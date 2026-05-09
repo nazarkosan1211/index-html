@@ -233,6 +233,39 @@
       margin-top:5px;
     }
 
+
+/* Final Earn Layout + Bigger Bottom Nav */
+.nav{
+  height:72px !important;
+}
+.nav button{
+  font-size:12px !important;
+  font-weight:700;
+}
+.nav span{
+  font-size:22px !important;
+  margin-bottom:3px !important;
+}
+
+/* Coming soon extra task */
+.coming-task{
+  background:
+    radial-gradient(circle at top right,rgba(59,130,246,.16),transparent 30%),
+    linear-gradient(135deg,rgba(15,23,42,.95),rgba(30,41,59,.96));
+  border:1px solid rgba(148,163,184,.14);
+}
+.coming-badge{
+  display:inline-block;
+  margin-top:4px;
+  padding:4px 8px;
+  border-radius:999px;
+  background:rgba(96,165,250,.12);
+  color:#93c5fd;
+  border:1px solid rgba(96,165,250,.18);
+  font-size:10px;
+  font-weight:900;
+}
+
 </style>
 </head>
 
@@ -301,7 +334,22 @@
       </div>
     </div>
 
-    <div class="task-row" id="joinTaskBox">
+    
+<div class="task-row coming-task">
+  <div class="task-main">
+    <div class="task-left">
+      <div class="icon">🚀</div>
+      <div>
+        <div class="task-title">Extra Task</div>
+        <div class="task-sub">New reward missions arriving soon</div>
+        <div class="coming-badge">COMING SOON</div>
+      </div>
+    </div>
+    <div class="reward">+?</div>
+  </div>
+</div>
+
+<div class="task-row" id="joinTaskBox">
       <div class="task-main" onclick="toggleTask('joinTaskBox')">
         <div class="task-left">
           <div class="icon">📢</div>
