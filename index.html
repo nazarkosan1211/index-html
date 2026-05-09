@@ -204,7 +204,129 @@
       padding:12px;
     }
 
-  </style>
+  
+    .super-task{
+      background:
+        radial-gradient(circle at top right,rgba(168,85,247,.22),transparent 34%),
+        linear-gradient(135deg,rgba(88,28,135,.92),rgba(30,41,59,.95));
+      border:1px solid rgba(192,132,252,.25);
+      box-shadow:0 10px 24px rgba(0,0,0,.18);
+    }
+    .super-task .icon{
+      background:rgba(255,255,255,.10);
+      color:#f5d0fe;
+    }
+    .super-task .reward{
+      background:rgba(250,204,21,.18);
+      color:#fde68a;
+      border:1px solid rgba(250,204,21,.18);
+    }
+    .super-glow{
+      display:inline-block;
+      font-size:10px;
+      font-weight:900;
+      color:#fde68a;
+      background:rgba(250,204,21,.14);
+      border:1px solid rgba(250,204,21,.18);
+      border-radius:999px;
+      padding:4px 7px;
+      margin-top:5px;
+    }
+
+
+    /* Ultra Compact Scale -30% */
+    body{padding-bottom:56px}
+    .top{padding:8px 10px 2px}
+    .brand{font-size:17px}
+    .user{font-size:10px;margin-top:2px}
+
+    .hero-balance{
+      margin:6px 8px 7px;
+      padding:9px 10px;
+      border-radius:15px;
+    }
+    .hero-label{font-size:8px}
+    .hero-dollar{font-size:21px;margin-top:2px}
+    .hero-points{font-size:10px;margin-top:3px}
+    .premium-badge{font-size:8px;padding:4px 6px}
+    .quick-grid{gap:5px;margin-top:7px}
+    .quick-item{padding:5px 4px;border-radius:10px}
+    .quick-item b{font-size:12px}
+    .quick-item div{font-size:8px}
+
+    .page{padding:0 8px}
+    .card{
+      padding:8px;
+      margin-bottom:6px;
+      border-radius:13px;
+    }
+    h3{font-size:12px;margin-bottom:3px}
+    .muted{font-size:10px;line-height:1.25}
+
+    .task-list{gap:5px}
+    .task-row{
+      padding:6px;
+      border-radius:12px;
+    }
+    .task-main{gap:6px}
+    .task-left{gap:6px}
+    .icon{
+      width:24px;
+      height:24px;
+      border-radius:8px;
+      font-size:13px;
+    }
+    .task-title{font-size:10.5px}
+    .task-sub{font-size:9px;margin-top:1px}
+    .reward{font-size:9px;padding:4px 6px}
+    .task-actions{margin-top:5px}
+
+    .ad-box{
+      padding:6px;
+      border-radius:10px;
+      margin-top:5px;
+    }
+    .timer{font-size:17px;margin:2px 0}
+    .progress-wrap{height:5px;margin-top:5px}
+
+    .btn{
+      padding:8px 9px;
+      border-radius:10px;
+      font-size:10.5px;
+      margin-top:5px;
+    }
+
+    input,select{
+      padding:8px;
+      border-radius:10px;
+      font-size:10.5px;
+      margin-top:5px;
+    }
+
+    .checkin-box{gap:3px;margin-top:5px}
+    .checkin-day{padding:4px 1px;border-radius:7px}
+    .checkin-day span{font-size:7px}
+    .checkin-day b{font-size:8px;margin-top:1px}
+
+    .rank{padding:6px 0;font-size:10px}
+
+    .row{gap:5px}
+    .mini .icon{width:23px;height:23px;font-size:12px}
+    .mini b{font-size:11px}
+
+    .coming-soon{font-size:9px;padding:5px 7px;margin-top:5px}
+    .super-glow{font-size:8px;padding:3px 5px;margin-top:3px}
+
+    .nav{height:54px}
+    .nav button{font-size:8.5px;padding:5px 0}
+    .nav span{font-size:15px;margin-bottom:1px}
+
+    #profile h2,#profile .card h2{
+      font-size:17px;
+      margin:5px 0 2px;
+    }
+
+</style>
 </head>
 
 <body>
@@ -334,15 +456,36 @@
       </div>
     </div>
 
-    <div class="task-row" id="extraTaskBox">
-      <div class="task-main" onclick="toggleTask('extraTaskBox')">
-        <div class="task-left">
-          <div class="icon">🎬</div>
-          <div>
-            <div class="task-title">Extra Ads Task</div>
-            <div class="task-sub">10 extra ads per day</div>
-          </div>
-        </div>
+    
+<div class="task-row super-task" id="superRewardBox">
+  <div class="task-main" onclick="toggleTask('superRewardBox')">
+    <div class="task-left">
+      <div class="icon">⚡</div>
+      <div>
+        <div class="task-title">Super Reward</div>
+        <div class="task-sub">High-value video missions • 15/day</div>
+        <div class="super-glow">PREMIUM VIDEO</div>
+      </div>
+    </div>
+    <div class="reward">+5</div>
+  </div>
+
+  <div class="task-actions">
+    <div class="muted">
+      Watch premium video ads and earn higher rewards instantly.
+    </div>
+
+    <div class="ad-box" style="margin-top:8px;background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.10)">
+      <div class="muted">Premium reward mission ready</div>
+      <div class="timer" style="color:#fde68a">+5</div>
+    </div>
+
+    <button class="btn" style="background:linear-gradient(135deg,#a855f7,#7c3aed)">
+      ▶ Start Super Reward
+    </button>
+  </div>
+</div>
+
         <div class="reward gold">+2</div>
       </div>
 
