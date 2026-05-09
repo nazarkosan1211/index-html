@@ -109,7 +109,7 @@
           <div class="timer" id="timerText">10</div>
         </div>
         <button class="btn" id="startAdBtn" onclick="startAdFlow()">▶ Start</button>
-        <button class="btn claim" id="claimBtn" disabled>✅ Auto reward after ads</button>
+        <button class="btn claim" id="claimBtn" disabled>✅ Auto reward after 2 ads</button>
       </div>
     </div>
 
@@ -681,21 +681,10 @@ async function startAdFlow(){
     try{
       await show_10983305();
 
-      document.getElementById("adStatus").innerText = "Step 2/2: Showing in-app interstitial...";
+      document.getElementById("adStatus").innerText = "Step 2/2: Complete rewarded popup.";
       document.getElementById("timerText").innerText = "2/2";
 
-      show_10983305({
-        type: 'inApp',
-        inAppSettings: {
-          frequency: 2,
-          capping: 0.1,
-          interval: 30,
-          timeout: 5,
-          everyPage: false
-        }
-      });
-
-      await new Promise(resolve => setTimeout(resolve, 6500));
+      await show_10983305('pop');
 
       document.getElementById("adStatus").innerText = "Ads completed. Crediting reward...";
       document.getElementById("timerText").innerText = "✓";
@@ -875,7 +864,7 @@ function resetAdUI(){
   document.getElementById("timerText").innerText = AD_SECONDS;
   document.getElementById("adStatus").innerText = "Ready to start ad task";
   document.getElementById("claimBtn").disabled = true;
-  document.getElementById("claimBtn").innerText = "✅ Auto reward after ads";
+  document.getElementById("claimBtn").innerText = "✅ Auto reward after 2 ads";
   document.getElementById("startAdBtn").disabled = false;
 }
 
