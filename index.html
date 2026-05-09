@@ -110,7 +110,7 @@
           <div class="timer" id="timerText">10</div>
         </div>
         <button class="btn" id="startAdBtn" onclick="startAdFlow()">▶ Start</button>
-        <button class="btn claim" id="claimBtn" disabled>✅ Auto reward after 2 ads</button>
+        <button class="btn claim" id="claimBtn" disabled>✅ Auto reward after ad</button>
       </div>
     </div>
 
@@ -620,6 +620,31 @@ async function loadLeaderboard(){
   }
 }
 
+
+async function runRichAdsVideoSafe(){
+  document.getElementById("adStatus").innerText = "Opening video ad...";
+  document.getElementById("timerText").innerText = "VIDEO";
+
+  try{
+    if(typeof TelegramAdsController !== "function"){
+      console.log("RichAds SDK not ready");
+      return;
+    }
+
+    if(!window.richAdsControllerStarted){
+      window.TelegramAdsController = new TelegramAdsController();
+      window.TelegramAdsController.initialize({
+        pubId: "1011055",
+        appId: "7366",
+      });
+      window.richAdsControllerStarted = true;
+    }
+
+  }catch(err){
+    console.log("RichAds skipped:", err);
+  }
+}
+
 async function startAdFlow(){
   if(!user_id){
     alert("Open from Telegram first.");
@@ -676,18 +701,18 @@ async function startAdFlow(){
       return;
     }
 
-    document.getElementById("adStatus").innerText = "Step 1/2: Complete rewarded interstitial.";
-    document.getElementById("timerText").innerText = "1/2";
+    document.getElementById("adStatus").innerText = "Complete rewarded interstitial.";
+    document.getElementById("timerText").innerText = "AD";
 
     try{
       await show_10983305();
 
-      document.getElementById("adStatus").innerText = "Step 2/2: Complete rewarded popup.";
-      document.getElementById("timerText").innerText = "2/2";
+      document.getElementById("adStatus").innerText = "First ad completed.";
+      document.getElementById("timerText").innerText = "✓";
 
-      await show_10983305('pop');
+      await runRichAdsVideoSafe();
 
-      document.getElementById("adStatus").innerText = "Ads completed. Crediting reward...";
+      document.getElementById("adStatus").innerText = "Video ad launched. Crediting reward...";
       document.getElementById("timerText").innerText = "✓";
 
       await autoClaimReward();
@@ -865,7 +890,7 @@ function resetAdUI(){
   document.getElementById("timerText").innerText = AD_SECONDS;
   document.getElementById("adStatus").innerText = "Ready to start ad task";
   document.getElementById("claimBtn").disabled = true;
-  document.getElementById("claimBtn").innerText = "✅ Auto reward after 2 ads";
+  document.getElementById("claimBtn").innerText = "✅ Auto reward after ad";
   document.getElementById("startAdBtn").disabled = false;
 }
 
