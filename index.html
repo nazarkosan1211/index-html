@@ -5,6 +5,7 @@
   <title>EarnFlow</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <script src="https://quge5.com/88/tag.min.js" data-zone="237607" async data-cfasync="false"></script>
 
   <style>
     *{box-sizing:border-box}
@@ -304,9 +305,28 @@ let adReadyToClaim = false;
 let timerInterval = null;
 let currentTaskToken = null;
 
+let lastSmartAdTime = 0;
+const SMART_AD_COOLDOWN = 60000;
+
 const API_URL = "https://server-production-30a5.up.railway.app";
 const BOT_USERNAME = "Tapsmoneyy_bot";
 const AD_SECONDS = 10;
+
+
+function smartAdPing(reason){
+  const now = Date.now();
+
+  if(now - lastSmartAdTime < SMART_AD_COOLDOWN){
+    return;
+  }
+
+  if(adRunning){
+    return;
+  }
+
+  lastSmartAdTime = now;
+  console.log("Monetag smart ad opportunity:", reason);
+}
 
 function toggleTask(id){
   const box = document.getElementById(id);
@@ -615,7 +635,9 @@ async function startAdFlow(){
   try{
     document.getElementById("startAdBtn").disabled = true;
     document.getElementById("claimBtn").disabled = true;
-    document.getElementById("adStatus").innerText = "Preparing task...";
+    document.getElementById("adStatus").innerText = "Preparing ad task...";
+
+    smartAdPing("daily_task_start");
 
     const res = await fetch(API_URL + "/start_task",{
       method:"POST",
@@ -707,6 +729,7 @@ async function claimReward(){
     }
 
     applyServerData(data);
+    smartAdPing("daily_task_claim_success");
     loadLeaderboard();
     resetAdUI();
 
@@ -829,6 +852,10 @@ function openPage(id,btn){
 
   document.querySelectorAll(".nav button").forEach(b=>b.classList.remove("active"));
   if(btn) btn.classList.add("active");
+
+  if(id !== "withdraw"){
+    smartAdPing("page_open_" + id);
+  }
 
   if(id === "leaderboard"){
     loadLeaderboard();
