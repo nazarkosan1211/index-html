@@ -120,7 +120,7 @@
           <div class="timer" id="timerText">10</div>
         </div>
         <button class="btn" id="startAdBtn" onclick="startAdFlow()">▶ Start</button>
-        <button class="btn claim" id="claimBtn" disabled>✅ Auto reward after ad</button>
+        <button class="btn claim" id="claimBtn" disabled>✅ Auto reward after 2 ads</button>
       </div>
     </div>
 
@@ -650,7 +650,7 @@ async function startAdFlow(){
     document.getElementById("startAdBtn").disabled = true;
     document.getElementById("claimBtn").disabled = true;
     document.getElementById("adStatus").innerText = "Preparing rewarded ad...";
-    document.getElementById("timerText").innerText = "AD";
+    document.getElementById("timerText").innerText = "1/2";
 
     const res = await fetch(API_URL + "/start_task",{
       method:"POST",
@@ -689,7 +689,7 @@ async function startAdFlow(){
       return;
     }
 
-    document.getElementById("adStatus").innerText = "Complete rewarded interstitial.";
+    document.getElementById("adStatus").innerText = "Step 1/2: Complete rewarded interstitial.";
     document.getElementById("timerText").innerText = "AD";
 
     try{
@@ -876,7 +876,7 @@ function resetAdUI(){
   document.getElementById("timerText").innerText = AD_SECONDS;
   document.getElementById("adStatus").innerText = "Ready to start ad task";
   document.getElementById("claimBtn").disabled = true;
-  document.getElementById("claimBtn").innerText = "✅ Auto reward after ad";
+  document.getElementById("claimBtn").innerText = "✅ Auto reward after 2 ads";
   document.getElementById("startAdBtn").disabled = false;
 }
 
