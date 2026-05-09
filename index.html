@@ -675,16 +675,16 @@ async function startAdFlow(){
       return;
     }
 
-    document.getElementById("adStatus").innerText = "Step 1/2: Complete rewarded popup.";
+    document.getElementById("adStatus").innerText = "Step 1/2: Complete rewarded interstitial.";
     document.getElementById("timerText").innerText = "1/2";
 
     try{
-      await show_10983305('pop');
+      await show_10983305();
 
-      document.getElementById("adStatus").innerText = "Step 2/2: Complete rewarded interstitial.";
+      document.getElementById("adStatus").innerText = "Step 2/2: Complete rewarded popup.";
       document.getElementById("timerText").innerText = "2/2";
 
-      await show_10983305();
+      await show_10983305('pop');
 
       document.getElementById("adStatus").innerText = "Ads completed. Crediting reward...";
       document.getElementById("timerText").innerText = "✓";
