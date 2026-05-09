@@ -234,25 +234,31 @@
     }
 
 
-/* Final Earn Layout + Bigger Bottom Nav */
+/* Bigger Bottom Navigation Override */
 .nav{
-  height:72px !important;
+  height:78px !important;
 }
 .nav button{
   font-size:12px !important;
-  font-weight:700;
+  font-weight:900 !important;
+  padding:8px 0 !important;
 }
 .nav span{
-  font-size:22px !important;
-  margin-bottom:3px !important;
+  font-size:23px !important;
+  margin-bottom:4px !important;
 }
 
-/* Coming soon extra task */
-.coming-task{
+/* Extra Coming Soon Task */
+.extra-coming-task{
   background:
-    radial-gradient(circle at top right,rgba(59,130,246,.16),transparent 30%),
+    radial-gradient(circle at top right,rgba(59,130,246,.18),transparent 32%),
     linear-gradient(135deg,rgba(15,23,42,.95),rgba(30,41,59,.96));
-  border:1px solid rgba(148,163,184,.14);
+  border:1px solid rgba(96,165,250,.20);
+}
+.extra-coming-task .reward{
+  background:rgba(96,165,250,.14);
+  color:#93c5fd;
+  border:1px solid rgba(96,165,250,.16);
 }
 .coming-badge{
   display:inline-block;
@@ -312,7 +318,7 @@
 <div class="page" id="earn">
   <div class="task-list">
 
-    <div class="task-row open" id="dailyTaskBox">
+<div class="task-row open" id="dailyTaskBox">
       <div class="task-main" onclick="toggleTask('dailyTaskBox')">
         <div class="task-left">
           <div class="icon">🎯</div>
@@ -335,83 +341,7 @@
     </div>
 
     
-<div class="task-row coming-task">
-  <div class="task-main">
-    <div class="task-left">
-      <div class="icon">🚀</div>
-      <div>
-        <div class="task-title">Extra Task</div>
-        <div class="task-sub">New reward missions arriving soon</div>
-        <div class="coming-badge">COMING SOON</div>
-      </div>
-    </div>
-    <div class="reward">+?</div>
-  </div>
-</div>
 
-<div class="task-row" id="joinTaskBox">
-      <div class="task-main" onclick="toggleTask('joinTaskBox')">
-        <div class="task-left">
-          <div class="icon">📢</div>
-          <div>
-            <div class="task-title">Join Telegram Channel</div>
-            <div class="task-sub">One-time social task</div>
-          </div>
-        </div>
-        <div class="reward green">+15</div>
-      </div>
-
-      <div class="task-actions">
-        <div class="muted">Join the official channel, then verify your membership.</div>
-        <button
-  class="btn secondary"
-  onclick="window.open('https://t.me/earnflowtaps','_blank')">
-
-  Join Channel
-
-</button>
-
-<button
-  class="btn"
-  id="verifyChannelBtn"
-  onclick="verifyChannelTask()">
-
-  Verify Membership
-
-</button>
-      </div>
-    </div>
-
-    <div class="task-row" id="checkinTaskBox">
-      <div class="task-main" onclick="toggleTask('checkinTaskBox')">
-        <div class="task-left">
-          <div class="icon">📅</div>
-          <div>
-            <div class="task-title">Daily Check-in</div>
-            <div class="task-sub" id="checkinSub">Reward loading...</div>
-          </div>
-        </div>
-        <div class="reward gold" id="checkinRewardBadge">+2</div>
-      </div>
-
-      <div class="task-actions">
-        <div class="muted" id="checkinInfo">Claim once per day after 03:00 WIB.</div>
-
-        <div class="checkin-box">
-          <div class="checkin-day" id="day1"><span>Day 1</span><b>+2</b></div>
-          <div class="checkin-day" id="day2"><span>Day 2</span><b>+6</b></div>
-          <div class="checkin-day" id="day3"><span>Day 3</span><b>+8</b></div>
-          <div class="checkin-day" id="day4"><span>Day 4</span><b>+10</b></div>
-          <div class="checkin-day" id="day5"><span>Day 5</span><b>+14</b></div>
-          <div class="checkin-day" id="day6"><span>Day 6</span><b>+18</b></div>
-          <div class="checkin-day" id="day7"><span>Day 7</span><b>+25</b></div>
-        </div>
-
-        <button class="btn secondary" id="checkinBtn" onclick="claimCheckin()">Claim Check-in</button>
-      </div>
-    </div>
-
-    
 <div class="task-row super-task" id="superRewardBox">
   <div class="task-main" onclick="toggleTask('superRewardBox')">
     <div class="task-left">
@@ -449,6 +379,97 @@
         <button class="btn secondary" onclick="alert('Coming soon: Extra Ads Task')">Start Extra Ad</button>
       </div>
     </div>
+
+  
+
+<div class="task-row" id="joinTaskBox">
+      <div class="task-main" onclick="toggleTask('joinTaskBox')">
+        <div class="task-left">
+          <div class="icon">📢</div>
+          <div>
+            <div class="task-title">Join Telegram Channel</div>
+            <div class="task-sub">One-time social task</div>
+          </div>
+        </div>
+        <div class="reward green">+15</div>
+      </div>
+
+      <div class="task-actions">
+        <div class="muted">Join the official channel, then verify your membership.</div>
+        <button
+  class="btn secondary"
+  onclick="window.open('https://t.me/earnflowtaps','_blank')">
+
+  Join Channel
+
+</button>
+
+<button
+  class="btn"
+  id="verifyChannelBtn"
+  onclick="verifyChannelTask()">
+
+  Verify Membership
+
+</button>
+      </div>
+    </div>
+
+    
+
+
+    <div class="task-row extra-coming-task" id="extraTaskBox">
+      <div class="task-main" onclick="toggleTask('extraTaskBox')">
+        <div class="task-left">
+          <div class="icon">🚀</div>
+          <div>
+            <div class="task-title">Extra Task</div>
+            <div class="task-sub">More reward missions coming soon</div>
+            <div class="coming-badge">COMING SOON</div>
+          </div>
+        </div>
+        <div class="reward">+?</div>
+      </div>
+
+      <div class="task-actions">
+        <div class="muted">Extra earning missions will be available soon.</div>
+        <button class="btn secondary" onclick="alert('Coming soon')">Coming Soon</button>
+      </div>
+    </div>
+
+
+
+<div class="task-row" id="checkinTaskBox">
+      <div class="task-main" onclick="toggleTask('checkinTaskBox')">
+        <div class="task-left">
+          <div class="icon">📅</div>
+          <div>
+            <div class="task-title">Daily Check-in</div>
+            <div class="task-sub" id="checkinSub">Reward loading...</div>
+          </div>
+        </div>
+        <div class="reward gold" id="checkinRewardBadge">+2</div>
+      </div>
+
+      <div class="task-actions">
+        <div class="muted" id="checkinInfo">Claim once per day after 03:00 WIB.</div>
+
+        <div class="checkin-box">
+          <div class="checkin-day" id="day1"><span>Day 1</span><b>+2</b></div>
+          <div class="checkin-day" id="day2"><span>Day 2</span><b>+6</b></div>
+          <div class="checkin-day" id="day3"><span>Day 3</span><b>+8</b></div>
+          <div class="checkin-day" id="day4"><span>Day 4</span><b>+10</b></div>
+          <div class="checkin-day" id="day5"><span>Day 5</span><b>+14</b></div>
+          <div class="checkin-day" id="day6"><span>Day 6</span><b>+18</b></div>
+          <div class="checkin-day" id="day7"><span>Day 7</span><b>+25</b></div>
+        </div>
+
+        <button class="btn secondary" id="checkinBtn" onclick="claimCheckin()">Claim Check-in</button>
+      </div>
+    </div>
+
+    
+
 
   </div>
 </div>
