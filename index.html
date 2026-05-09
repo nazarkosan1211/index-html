@@ -7,16 +7,6 @@
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <script src='//libtl.com/sdk.js' data-zone='10983305' data-sdk='show_10983305'></script>
 
-  <script src="https://richinfo.co/richpartners/telegram/js/tg-ob.js"></script>
-  <script>
-    window.TelegramAdsController = new TelegramAdsController();
-    window.TelegramAdsController.initialize({
-      pubId: "1011055",
-      appId: "7366",
-    });
-  </script>
-
-
   <style>
     *{box-sizing:border-box}
     body{margin:0;font-family:Arial,sans-serif;background:#07111f;color:white;padding-bottom:86px}
@@ -66,6 +56,40 @@
     .nav button{background:#08111f;border:none;color:#7f93aa;font-size:11px;font-weight:800;padding:8px 0}
     .nav button.active{color:#22d3ee}
     .nav span{display:block;font-size:21px;margin-bottom:4px}
+  
+    .hero-balance{
+      margin:0 16px 12px;
+      padding:18px;
+      border-radius:24px;
+      background:
+        radial-gradient(circle at top left,rgba(34,211,238,.26),transparent 38%),
+        linear-gradient(135deg,rgba(15,23,42,.96),rgba(30,41,59,.92));
+      border:1px solid rgba(255,255,255,.10);
+      box-shadow:0 18px 40px rgba(0,0,0,.22);
+    }
+    .hero-top{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+    .hero-label{font-size:12px;color:#9fb3c8;font-weight:800;text-transform:uppercase;letter-spacing:.08em}
+    .hero-dollar{font-size:34px;font-weight:1000;margin-top:5px;line-height:1}
+    .hero-points{font-size:13px;color:#cbd5e1;margin-top:8px}
+    .premium-badge{font-size:11px;font-weight:900;color:#fde68a;background:rgba(250,204,21,.13);border:1px solid rgba(250,204,21,.22);border-radius:999px;padding:7px 9px;white-space:nowrap}
+    .quick-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:14px}
+    .quick-item{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.08);border-radius:15px;padding:10px;text-align:center}
+    .quick-item b{font-size:16px}
+    .quick-item div{font-size:10px;color:#8fa3bd;margin-top:3px}
+    .progress-wrap{height:9px;border-radius:99px;background:rgba(255,255,255,.10);overflow:hidden;margin-top:10px}
+    .progress-bar{height:100%;width:0%;border-radius:99px;background:linear-gradient(90deg,#22d3ee,#6366f1)}
+    .premium-card{background:linear-gradient(135deg,rgba(255,255,255,.09),rgba(255,255,255,.045));border:1px solid rgba(255,255,255,.10)}
+    .prize-card{background:radial-gradient(circle at top right,rgba(250,204,21,.18),transparent 35%),rgba(255,255,255,.07);border:1px solid rgba(250,204,21,.18)}
+    .coming-soon{display:inline-block;margin-top:8px;padding:8px 11px;border-radius:999px;background:rgba(250,204,21,.13);color:#fde68a;font-size:12px;font-weight:1000}
+    .task-row{padding:10px}
+    .icon{width:34px;height:34px;border-radius:12px;font-size:18px}
+    .task-title{font-size:13px}
+    .task-sub{font-size:11px}
+    .reward{font-size:11px;padding:6px 8px}
+    .btn{padding:12px;border-radius:13px;font-size:13px}
+    .ad-box{padding:12px}
+    .timer{font-size:26px}
+
   </style>
 </head>
 
@@ -76,16 +100,27 @@
   <div class="user" id="userInfo">Loading user...</div>
 </div>
 
-<div class="mini-stats">
-  <div class="stat"><b id="coin">0</b><div>Points</div></div>
-  <div class="stat"><b id="completedText">0</b><div>Tasks</div></div>
-  <div class="stat"><b id="refCount">0</b><div>Refs</div></div>
+<div class="hero-balance">
+  <div class="hero-top">
+    <div>
+      <div class="hero-label">Estimated Balance</div>
+      <div class="hero-dollar" id="dollarEstimate">$0.00</div>
+      <div class="hero-points"><span id="coin">0</span> Points</div>
+    </div>
+    <div class="premium-badge">PRO EARN</div>
+  </div>
+
+  <div class="quick-grid">
+    <div class="quick-item"><b id="completedText">0</b><div>Tasks</div></div>
+    <div class="quick-item"><b id="dailyTaskLeftTop">50</b><div>Left</div></div>
+    <div class="quick-item"><b id="refCount">0</b><div>Refs</div></div>
+  </div>
 </div>
 
 <div class="page active" id="home">
-  <div class="card">
-    <h3>Home</h3>
-    <div class="muted">Complete tasks, invite friends, and climb the leaderboard.</div>
+  <div class="card premium-card">
+    <h3>EarnFlow Dashboard</h3>
+    <div class="muted">Complete rewarded tasks, grow your balance, and climb the global leaderboard.</div>
     <button class="btn" onclick="openPage('earn')">Start Earning</button>
     <button class="btn secondary" onclick="syncPoints()">Refresh Points</button>
   </div>
@@ -107,7 +142,7 @@
           <div class="icon">🎯</div>
           <div>
             <div class="task-title">Daily Ad Task</div>
-            <div class="task-sub"><span id="earnCompleted">0</span>/30 completed</div>
+            <div class="task-sub"><span id="earnCompleted">0</span>/50 completed</div><div class="progress-wrap"><div class="progress-bar" id="dailyProgressBar"></div></div>
           </div>
         </div>
         <div class="reward">+1</div>
@@ -207,9 +242,15 @@
 </div>
 
 <div class="page" id="leaderboard">
-  <div class="card">
-    <h3>Leaderboard 🏆</h3>
-    <div class="muted">Top global EarnFlow users</div>
+  <div class="card prize-card">
+    <h3>Monthly Prize Pool 🏆</h3>
+    <div class="muted">Top users will be rewarded every month. Prize details will be announced soon.</div>
+    <div class="coming-soon">Coming Soon</div>
+  </div>
+
+  <div class="card premium-card">
+    <h3>Leaderboard</h3>
+    <div class="muted">Top global EarnFlow users by points</div>
     <div id="leaderboardList" style="margin-top:15px;">Loading leaderboard...</div>
   </div>
 </div>
@@ -246,7 +287,13 @@
     <h2 id="profileId">-</h2>
   </div>
 
-  <div class="row">
+    <div class="card premium-card">
+    <h3>Estimated Value</h3>
+    <h2 id="profileDollar">$0.00</h2>
+    <div class="muted">Rate: 100 Points = $0.10</div>
+  </div>
+
+<div class="row">
     <div class="card mini">
       <div class="icon" style="margin:auto">💎</div>
       <b id="profileCoin">0</b>
@@ -269,7 +316,7 @@
 
     <div class="card mini">
       <div class="icon" style="margin:auto">🔥</div>
-      <b id="dailyTaskLeft">30</b>
+      <b id="dailyTaskLeft">50</b>
       <div class="muted">Tasks Left</div>
     </div>
   </div>
@@ -301,7 +348,7 @@
 let user_id = null;
 let coins = 0;
 let completed = 0;
-let remaining = 30;
+let remaining = 50;
 let refCount = 0;
 let todayRefCount = 0;
 
@@ -343,7 +390,14 @@ function toggleTask(id){
   box.classList.toggle("open");
 }
 
+function formatDollar(points){
+  return "$" + (Number(points || 0) / 1000).toFixed(2);
+}
+
 function updateUI(){
+  const usd = formatDollar(coins);
+  document.getElementById("dollarEstimate").innerText = usd;
+  document.getElementById("profileDollar").innerText = usd;
   document.getElementById("coin").innerText = coins;
   document.getElementById("profileCoin").innerText = coins;
   document.getElementById("completedText").innerText = completed;
@@ -352,6 +406,10 @@ function updateUI(){
   document.getElementById("profileRefCount").innerText = refCount;
   document.getElementById("todayRefCount").innerText = todayRefCount;
   document.getElementById("dailyTaskLeft").innerText = remaining;
+  document.getElementById("dailyTaskLeftTop").innerText = remaining;
+
+  const progressPercent = Math.min(100, Math.max(0, (completed / 50) * 100));
+  document.getElementById("dailyProgressBar").style.width = progressPercent + "%";
 
   document.getElementById("profileStreak").innerText = dailyStreak;
   document.getElementById("profileNextReward").innerText = nextCheckinReward;
@@ -385,7 +443,7 @@ function updateUI(){
 function applyServerData(data){
   coins = Number(data.coins || coins || 0);
   completed = Number(data.tasks_done || 0);
-  remaining = Number(data.remaining_tasks || 30);
+  remaining = Number(data.remaining_tasks || 50);
   refCount = Number(data.total_ref_count || data.ref_count || 0);
   todayRefCount = Number(data.today_ref_count || 0);
 
