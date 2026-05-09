@@ -5,7 +5,17 @@
   <title>EarnFlow</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
+
   <script src="https://richinfo.co/richpartners/telegram/js/tg-ob.js"></script>
+  <script>
+    window.TelegramAdsController = new TelegramAdsController();
+    window.TelegramAdsController.initialize({
+      pubId: "1011055",
+      appId: "7366",
+    });
+  </script>
+
+  
 <script src='//libtl.com/sdk.js' data-zone='10983305' data-sdk='show_10983305'></script>
 
   <style>
@@ -621,29 +631,7 @@ async function loadLeaderboard(){
 }
 
 
-async function runRichAdsVideoSafe(){
-  document.getElementById("adStatus").innerText = "Opening video ad...";
-  document.getElementById("timerText").innerText = "VIDEO";
 
-  try{
-    if(typeof TelegramAdsController !== "function"){
-      console.log("RichAds SDK not ready");
-      return;
-    }
-
-    if(!window.richAdsControllerStarted){
-      window.TelegramAdsController = new TelegramAdsController();
-      window.TelegramAdsController.initialize({
-        pubId: "1011055",
-        appId: "7366",
-      });
-      window.richAdsControllerStarted = true;
-    }
-
-  }catch(err){
-    console.log("RichAds skipped:", err);
-  }
-}
 
 async function startAdFlow(){
   if(!user_id){
@@ -710,9 +698,7 @@ async function startAdFlow(){
       document.getElementById("adStatus").innerText = "First ad completed.";
       document.getElementById("timerText").innerText = "✓";
 
-      await runRichAdsVideoSafe();
-
-      document.getElementById("adStatus").innerText = "Video ad launched. Crediting reward...";
+      document.getElementById("adStatus").innerText = "";
       document.getElementById("timerText").innerText = "✓";
 
       await autoClaimReward();
