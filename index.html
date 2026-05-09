@@ -5,6 +5,7 @@
   <title>EarnFlow</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <script src='//libtl.com/sdk.js' data-zone='10983305' data-sdk='show_10983305'></script>
 
   <style>
     *{box-sizing:border-box}
@@ -108,7 +109,7 @@
           <div class="timer" id="timerText">10</div>
         </div>
         <button class="btn" id="startAdBtn" onclick="startAdFlow()">▶ Start</button>
-        <button class="btn claim" id="claimBtn" onclick="claimReward()" disabled>✅ Claim +1</button>
+        <button class="btn claim" id="claimBtn" disabled>✅ Auto reward after ad</button>
       </div>
     </div>
 
@@ -304,10 +305,28 @@ let adReadyToClaim = false;
 let timerInterval = null;
 let currentTaskToken = null;
 
+let lastSmartAdTime = 0;
+const SMART_AD_COOLDOWN = 60000;
+
 const API_URL = "https://server-production-30a5.up.railway.app";
 const BOT_USERNAME = "Tapsmoneyy_bot";
 const AD_SECONDS = 10;
 
+
+function smartAdPing(reason){
+  const now = Date.now();
+
+  if(now - lastSmartAdTime < SMART_AD_COOLDOWN){
+    return;
+  }
+
+  if(adRunning){
+    return;
+  }
+
+  lastSmartAdTime = now;
+  console.log("Monetag smart ad opportunity:", reason);
+}
 
 function toggleTask(id){
   const box = document.getElementById(id);
@@ -616,7 +635,8 @@ async function startAdFlow(){
   try{
     document.getElementById("startAdBtn").disabled = true;
     document.getElementById("claimBtn").disabled = true;
-    document.getElementById("adStatus").innerText = "Preparing ad task...";
+    document.getElementById("adStatus").innerText = "Preparing rewarded ad...";
+    document.getElementById("timerText").innerText = "AD";
 
     const res = await fetch(API_URL + "/start_task",{
       method:"POST",
@@ -629,6 +649,8 @@ async function startAdFlow(){
     if(data.status === "blocked"){
       if(data.reason === "cooldown"){
         alert("Wait " + data.wait + " seconds.");
+      }else if(data.reason === "banned"){
+        alert("Account blocked.");
       }else{
         alert("Daily limit reached.");
       }
@@ -647,23 +669,23 @@ async function startAdFlow(){
     adRunning = true;
     adReadyToClaim = false;
 
-    let timeLeft = AD_SECONDS;
+    if(typeof show_10983305 !== "function"){
+      alert("Rewarded ad is not ready yet. Please try again in a moment.");
+      resetAdUI();
+      return;
+    }
 
-    document.getElementById("adStatus").innerText = "Watching ad...";
-    document.getElementById("timerText").innerText = timeLeft;
+    document.getElementById("adStatus").innerText = "Watch the ad until it finishes.";
 
-    timerInterval = setInterval(function(){
-      timeLeft--;
-      document.getElementById("timerText").innerText = timeLeft;
+    show_10983305().then(async () => {
+      document.getElementById("adStatus").innerText = "Ad completed. Crediting reward...";
+      document.getElementById("timerText").innerText = "✓";
 
-      if(timeLeft <= 0){
-        clearInterval(timerInterval);
-        adRunning = false;
-        adReadyToClaim = true;
-        document.getElementById("adStatus").innerText = "Ad completed. Claim reward now.";
-        document.getElementById("claimBtn").disabled = false;
-      }
-    },1000);
+      await autoClaimReward();
+    }).catch(() => {
+      alert("Ad was not completed. Please try again.");
+      resetAdUI();
+    });
 
   }catch(err){
     alert("Network error. Please try again.");
@@ -671,15 +693,14 @@ async function startAdFlow(){
   }
 }
 
-async function claimReward(){
-  if(!adReadyToClaim || !currentTaskToken){
-    alert("Complete the ad first.");
+async function autoClaimReward(){
+  if(!currentTaskToken){
+    alert("Task token missing. Please start again.");
+    resetAdUI();
     return;
   }
 
   try{
-    document.getElementById("claimBtn").disabled = true;
-
     const res = await fetch(API_URL + "/add_coin",{
       method:"POST",
       headers:{ "Content-Type":"application/json" },
@@ -699,6 +720,8 @@ async function claimReward(){
         alert("Invalid task claim.");
       }else if(data.reason === "expired_task_token"){
         alert("Task expired. Please start again.");
+      }else if(data.reason === "banned"){
+        alert("Account blocked.");
       }else{
         alert("Daily limit reached.");
       }
@@ -707,14 +730,25 @@ async function claimReward(){
       return;
     }
 
-    applyServerData(data);
-    loadLeaderboard();
+    if(data.status === "success"){
+      applyServerData(data);
+      loadLeaderboard();
+      document.getElementById("adStatus").innerText = "Reward credited successfully!";
+      setTimeout(resetAdUI, 900);
+      return;
+    }
+
+    alert("Reward failed. Please try again.");
     resetAdUI();
 
   }catch(err){
     alert("Network error. Please try again.");
     resetAdUI();
   }
+}
+
+async function claimReward(){
+  alert("Reward is automatic after watching the ad.");
 }
 
 
@@ -821,6 +855,7 @@ function resetAdUI(){
   document.getElementById("timerText").innerText = AD_SECONDS;
   document.getElementById("adStatus").innerText = "Ready to start ad task";
   document.getElementById("claimBtn").disabled = true;
+  document.getElementById("claimBtn").innerText = "✅ Auto reward after ad";
   document.getElementById("startAdBtn").disabled = false;
 }
 
