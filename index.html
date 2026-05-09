@@ -7,6 +7,16 @@
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <script src='//libtl.com/sdk.js' data-zone='10983305' data-sdk='show_10983305'></script>
 
+  <script src="https://richinfo.co/richpartners/telegram/js/tg-ob.js"></script>
+  <script>
+    window.TelegramAdsController = new TelegramAdsController();
+    window.TelegramAdsController.initialize({
+      pubId: "1011055",
+      appId: "7366",
+    });
+  </script>
+
+
   <style>
     *{box-sizing:border-box}
     body{margin:0;font-family:Arial,sans-serif;background:#07111f;color:white;padding-bottom:86px}
@@ -90,6 +100,110 @@
     .ad-box{padding:12px}
     .timer{font-size:26px}
 
+  
+    /* Compact Premium Pass */
+    body{padding-bottom:70px}
+    .top{padding:12px 14px 4px}
+    .brand{font-size:21px;line-height:1.05}
+    .user{font-size:12px;margin-top:4px}
+
+    .hero-balance{
+      margin:8px 10px 10px;
+      padding:13px 14px;
+      border-radius:20px;
+    }
+    .hero-label{font-size:10px;letter-spacing:.07em}
+    .hero-dollar{font-size:28px;margin-top:3px}
+    .hero-points{font-size:12px;margin-top:5px}
+    .premium-badge{font-size:10px;padding:6px 8px}
+    .quick-grid{gap:7px;margin-top:11px}
+    .quick-item{padding:8px 6px;border-radius:13px}
+    .quick-item b{font-size:15px}
+    .quick-item div{font-size:9px}
+
+    .page{padding:0 10px}
+    .card{
+      border-radius:17px;
+      padding:12px;
+      margin-bottom:9px;
+    }
+    h3{font-size:15px;margin-bottom:5px}
+    .muted{font-size:12px;line-height:1.35}
+
+    .btn{
+      padding:10px 11px;
+      border-radius:12px;
+      font-size:12px;
+      margin-top:7px;
+    }
+
+    .task-list{gap:7px}
+    .task-row{
+      border-radius:15px;
+      padding:9px;
+    }
+    .task-main{gap:8px}
+    .task-left{gap:8px}
+    .icon{
+      width:30px;
+      height:30px;
+      border-radius:11px;
+      font-size:16px;
+    }
+    .task-title{font-size:12px}
+    .task-sub{font-size:10px;margin-top:2px}
+    .reward{font-size:10px;padding:5px 7px}
+    .task-actions{margin-top:7px}
+    .ad-box{
+      padding:9px;
+      border-radius:13px;
+      margin-top:6px;
+    }
+    .timer{font-size:22px;margin:3px 0}
+    .progress-wrap{height:7px;margin-top:7px}
+
+    .checkin-box{gap:4px;margin-top:7px}
+    .checkin-day{padding:6px 2px;border-radius:9px}
+    .checkin-day span{font-size:8px}
+    .checkin-day b{font-size:10px;margin-top:2px}
+
+    input,select{
+      padding:10px;
+      border-radius:12px;
+      font-size:12px;
+      margin-top:7px;
+    }
+
+    .rank{
+      padding:9px 0;
+      font-size:12px;
+    }
+
+    .row{gap:8px}
+    .mini .icon{width:28px;height:28px;font-size:15px}
+    .mini b{font-size:14px}
+
+    .nav{
+      height:64px;
+      grid-template-columns:repeat(5,1fr);
+    }
+    .nav button{
+      font-size:10px;
+      padding:6px 0;
+    }
+    .nav span{
+      font-size:18px;
+      margin-bottom:2px;
+    }
+
+    #profile h2,#profile .card h2{
+      font-size:22px;
+      margin:8px 0 4px;
+    }
+    #profile .card{
+      padding:12px;
+    }
+
   </style>
 </head>
 
@@ -119,8 +233,8 @@
 
 <div class="page active" id="home">
   <div class="card premium-card">
-    <h3>EarnFlow Dashboard</h3>
-    <div class="muted">Complete rewarded tasks, grow your balance, and climb the global leaderboard.</div>
+    <h3>Dashboard</h3>
+    <div class="muted">Complete tasks, grow your balance, and climb the leaderboard.</div>
     <button class="btn" onclick="openPage('earn')">Start Earning</button>
     <button class="btn secondary" onclick="syncPoints()">Refresh Points</button>
   </div>
@@ -244,7 +358,7 @@
 <div class="page" id="leaderboard">
   <div class="card prize-card">
     <h3>Monthly Prize Pool 🏆</h3>
-    <div class="muted">Top users will be rewarded every month. Prize details will be announced soon.</div>
+    <div class="muted">Top users will be rewarded monthly. Details soon.</div>
     <div class="coming-soon">Coming Soon</div>
   </div>
 
@@ -268,7 +382,7 @@
     <input id="withdrawAmount" type="number" placeholder="Amount Points">
 
     <div class="muted" style="margin-top:10px;">
-      Minimum withdraw: 10,000 Points. Request will be reviewed manually by admin.
+      Minimum withdraw: 10,000 Points. Reviewed manually by admin.
     </div>
 
     <button class="btn" onclick="submitWithdraw()">Request Withdraw</button>
