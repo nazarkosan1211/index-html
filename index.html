@@ -501,11 +501,19 @@ async function verifyChannelTask(){
 
     const data = await res.json();
 
-    if(data.status === "success"){
+   if(data.status == "success"){
+
+      btn.innerText = "Reward Claimed";
+      btn.disabled = true;
+
       alert("Channel verified! +" + data.reward + " points");
+
       applyServerData(data);
+
       loadLeaderboard();
+
       return;
+    }
     }
 
     if(data.reason === "already_claimed"){
