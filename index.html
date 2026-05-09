@@ -98,7 +98,7 @@
           <div class="icon">🎯</div>
           <div>
             <div class="task-title">Daily Ad Task</div>
-            <div class="task-sub"><span id="earnCompleted">0</span>/30 completed</div>
+            <div class="task-sub"><span id="earnCompleted">0</span>/50 completed</div>
           </div>
         </div>
         <div class="reward">+1</div>
@@ -260,7 +260,7 @@
 
     <div class="card mini">
       <div class="icon" style="margin:auto">🔥</div>
-      <b id="dailyTaskLeft">30</b>
+      <b id="dailyTaskLeft">50</b>
       <div class="muted">Tasks Left</div>
     </div>
   </div>
@@ -292,7 +292,7 @@
 let user_id = null;
 let coins = 0;
 let completed = 0;
-let remaining = 30;
+let remaining = 50;
 let refCount = 0;
 let todayRefCount = 0;
 
@@ -376,7 +376,7 @@ function updateUI(){
 function applyServerData(data){
   coins = Number(data.coins || coins || 0);
   completed = Number(data.tasks_done || 0);
-  remaining = Number(data.remaining_tasks || 30);
+  remaining = Number(data.remaining_tasks || 50);
   refCount = Number(data.total_ref_count || data.ref_count || 0);
   todayRefCount = Number(data.today_ref_count || 0);
 
