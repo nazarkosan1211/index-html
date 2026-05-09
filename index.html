@@ -311,6 +311,8 @@ const SMART_AD_COOLDOWN = 60000;
 const API_URL = "https://server-production-30a5.up.railway.app";
 const BOT_USERNAME = "Tapsmoneyy_bot";
 const AD_SECONDS = 10;
+const DIRECT_AD_URL = "https://omg10.com/4/10983240";
+const DIRECT_AD_WAIT_SECONDS = 15;
 
 
 function smartAdPing(reason){
@@ -619,6 +621,15 @@ async function loadLeaderboard(){
   }
 }
 
+
+function openDailyDirectAd(){
+  try{
+    window.open(DIRECT_AD_URL, "_blank");
+  }catch(err){
+    window.location.href = DIRECT_AD_URL;
+  }
+}
+
 async function startAdFlow(){
   if(!user_id){
     alert("Open from Telegram first.");
@@ -635,54 +646,78 @@ async function startAdFlow(){
   try{
     document.getElementById("startAdBtn").disabled = true;
     document.getElementById("claimBtn").disabled = true;
-    document.getElementById("adStatus").innerText = "Preparing ad task...";
+    document.getElementById("adStatus").innerText = "Opening ad... Please watch the ad, then return here.";
 
-    smartAdPing("daily_task_start");
+    openDailyDirectAd();
+    smartAdPing("daily_task_forced_direct_link");
 
-    const res = await fetch(API_URL + "/start_task",{
-      method:"POST",
-      headers:{ "Content-Type":"application/json" },
-      body:JSON.stringify({ user_id:user_id })
-    });
+    let waitLeft = DIRECT_AD_WAIT_SECONDS;
+    document.getElementById("timerText").innerText = waitLeft;
 
-    const data = await res.json();
-
-    if(data.status === "blocked"){
-      if(data.reason === "cooldown"){
-        alert("Wait " + data.wait + " seconds.");
-      }else{
-        alert("Daily limit reached.");
-      }
-
-      resetAdUI();
-      return;
+    if(timerInterval){
+      clearInterval(timerInterval);
+      timerInterval = null;
     }
 
-    if(data.status !== "success" || !data.task_token){
-      alert("Failed to start task. Please try again.");
-      resetAdUI();
-      return;
-    }
+    timerInterval = setInterval(async function(){
+      waitLeft--;
+      document.getElementById("timerText").innerText = waitLeft;
 
-    currentTaskToken = data.task_token;
-    adRunning = true;
-    adReadyToClaim = false;
-
-    let timeLeft = AD_SECONDS;
-
-    document.getElementById("adStatus").innerText = "Watching ad...";
-    document.getElementById("timerText").innerText = timeLeft;
-
-    timerInterval = setInterval(function(){
-      timeLeft--;
-      document.getElementById("timerText").innerText = timeLeft;
-
-      if(timeLeft <= 0){
+      if(waitLeft <= 0){
         clearInterval(timerInterval);
-        adRunning = false;
-        adReadyToClaim = true;
-        document.getElementById("adStatus").innerText = "Ad completed. Claim reward now.";
-        document.getElementById("claimBtn").disabled = false;
+        timerInterval = null;
+
+        document.getElementById("adStatus").innerText = "Preparing reward token...";
+
+        const res = await fetch(API_URL + "/start_task",{
+          method:"POST",
+          headers:{ "Content-Type":"application/json" },
+          body:JSON.stringify({ user_id:user_id })
+        });
+
+        const data = await res.json();
+
+        if(data.status === "blocked"){
+          if(data.reason === "cooldown"){
+            alert("Wait " + data.wait + " seconds.");
+          }else if(data.reason === "banned"){
+            alert("Account blocked.");
+          }else{
+            alert("Daily limit reached.");
+          }
+
+          resetAdUI();
+          return;
+        }
+
+        if(data.status !== "success" || !data.task_token){
+          alert("Failed to start task. Please try again.");
+          resetAdUI();
+          return;
+        }
+
+        currentTaskToken = data.task_token;
+        adRunning = true;
+        adReadyToClaim = false;
+
+        let timeLeft = AD_SECONDS;
+
+        document.getElementById("adStatus").innerText = "Ad confirmed. Timer running...";
+        document.getElementById("timerText").innerText = timeLeft;
+
+        timerInterval = setInterval(function(){
+          timeLeft--;
+          document.getElementById("timerText").innerText = timeLeft;
+
+          if(timeLeft <= 0){
+            clearInterval(timerInterval);
+            timerInterval = null;
+            adRunning = false;
+            adReadyToClaim = true;
+            document.getElementById("adStatus").innerText = "Task completed. Claim reward now.";
+            document.getElementById("claimBtn").disabled = false;
+          }
+        },1000);
       }
     },1000);
 
