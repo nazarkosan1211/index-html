@@ -1,0 +1,731 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>EarnFlow</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+
+  <style>
+    *{box-sizing:border-box}
+    body{margin:0;font-family:Arial,sans-serif;background:#07111f;color:white;padding-bottom:86px}
+    .top{padding:18px 16px 8px}
+    .brand{font-size:24px;font-weight:900}
+    .user{color:#8fa3bd;margin-top:5px;font-size:13px}
+    .mini-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:12px 16px}
+    .stat{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:10px;text-align:center}
+    .stat b{font-size:18px}
+    .stat div{font-size:11px;color:#8fa3bd;margin-top:3px}
+    .page{display:none;padding:0 16px}
+    .page.active{display:block}
+    .card{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.08);border-radius:20px;padding:15px;margin-bottom:12px}
+    h3{margin:0 0 8px;font-size:17px}
+    .muted{color:#8fa3bd;font-size:13px;line-height:1.4}
+    .task-list{display:flex;flex-direction:column;gap:9px}
+    .task-row{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.08);border-radius:18px;padding:12px}
+    .task-main{display:flex;align-items:center;justify-content:space-between;gap:10px}
+    .task-left{display:flex;align-items:center;gap:10px}
+    .icon{width:38px;height:38px;border-radius:14px;background:rgba(34,211,238,.12);display:flex;align-items:center;justify-content:center;font-size:20px}
+    .task-title{font-size:14px;font-weight:900}
+    .task-sub{font-size:12px;color:#8fa3bd;margin-top:3px}
+    .reward{font-size:12px;font-weight:900;padding:7px 9px;border-radius:999px;background:rgba(34,211,238,.13);color:#67e8f9;white-space:nowrap}
+    .reward.green{background:rgba(34,197,94,.15);color:#86efac}
+    .reward.gold{background:rgba(250,204,21,.15);color:#fde68a}
+    .task-actions{display:none;margin-top:10px}
+    .task-row.open .task-actions{display:block}
+    .ad-box{text-align:center;padding:14px;border-radius:16px;background:rgba(6,182,212,.10);border:1px dashed rgba(34,211,238,.30);margin-top:9px}
+    .timer{font-size:30px;font-weight:900;margin:5px 0;color:#22d3ee}
+    .checkin-box{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;margin-top:10px}
+    .checkin-day{padding:8px 3px;border-radius:12px;background:rgba(255,255,255,.07);text-align:center;border:1px solid rgba(255,255,255,.08)}
+    .checkin-day.active{border-color:#22d3ee;background:rgba(34,211,238,.12)}
+    .checkin-day.claimed{border-color:#22c55e;background:rgba(34,197,94,.12)}
+    .checkin-day span{font-size:10px;color:#8fa3bd}
+    .checkin-day b{display:block;font-size:12px;margin-top:3px}
+    .btn{width:100%;border:none;border-radius:14px;padding:13px;font-size:14px;font-weight:900;color:white;background:linear-gradient(135deg,#06b6d4,#2563eb);margin-top:9px}
+    .btn.secondary{background:rgba(255,255,255,.12)}
+    .btn.claim{background:linear-gradient(135deg,#22c55e,#16a34a)}
+    .btn:disabled{opacity:.45}
+    input,select{width:100%;padding:13px;border-radius:14px;border:1px solid rgba(255,255,255,.10);background:rgba(255,255,255,.08);color:white;margin-top:9px;font-size:14px}
+    option{color:black}
+    .rank{display:flex;justify-content:space-between;padding:12px 0;border-bottom:1px solid rgba(255,255,255,.08);gap:10px}
+    .rank:last-child{border-bottom:none}
+    .row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    .mini{text-align:center}
+    .nav{position:fixed;bottom:0;left:0;right:0;height:76px;background:rgba(8,17,31,.96);border-top:1px solid rgba(255,255,255,.10);display:grid;grid-template-columns:repeat(5,1fr);z-index:20}
+    .nav button{background:#08111f;border:none;color:#7f93aa;font-size:11px;font-weight:800;padding:8px 0}
+    .nav button.active{color:#22d3ee}
+    .nav span{display:block;font-size:21px;margin-bottom:4px}
+  </style>
+</head>
+
+<body>
+
+<div class="top">
+  <div class="brand">EarnFlow ⚡</div>
+  <div class="user" id="userInfo">Loading user...</div>
+</div>
+
+<div class="mini-stats">
+  <div class="stat"><b id="coin">0</b><div>Points</div></div>
+  <div class="stat"><b id="completedText">0</b><div>Tasks</div></div>
+  <div class="stat"><b id="refCount">0</b><div>Refs</div></div>
+</div>
+
+<div class="page active" id="home">
+  <div class="card">
+    <h3>Home</h3>
+    <div class="muted">Complete tasks, invite friends, and climb the leaderboard.</div>
+    <button class="btn" onclick="openPage('earn')">Start Earning</button>
+    <button class="btn secondary" onclick="syncPoints()">Refresh Points</button>
+  </div>
+
+  <div class="card">
+    <h3>Referral 👥</h3>
+    <div class="muted">Earn +10 points per friend. Daily limit: 20 referrals.</div>
+    <input id="refLink" readonly value="Loading referral link...">
+    <button class="btn secondary" onclick="copyReferral()">Copy Referral Link</button>
+  </div>
+</div>
+
+<div class="page" id="earn">
+  <div class="task-list">
+
+    <div class="task-row open" id="dailyTaskBox">
+      <div class="task-main" onclick="toggleTask('dailyTaskBox')">
+        <div class="task-left">
+          <div class="icon">🎯</div>
+          <div>
+            <div class="task-title">Daily Ad Task</div>
+            <div class="task-sub"><span id="earnCompleted">0</span>/30 completed</div>
+          </div>
+        </div>
+        <div class="reward">+1</div>
+      </div>
+
+      <div class="task-actions">
+        <div class="ad-box">
+          <div class="muted" id="adStatus">Ready to start ad task</div>
+          <div class="timer" id="timerText">10</div>
+        </div>
+        <button class="btn" id="startAdBtn" onclick="startAdFlow()">▶ Start</button>
+        <button class="btn claim" id="claimBtn" onclick="claimReward()" disabled>✅ Claim +1</button>
+      </div>
+    </div>
+
+    <div class="task-row" id="joinTaskBox">
+      <div class="task-main" onclick="toggleTask('joinTaskBox')">
+        <div class="task-left">
+          <div class="icon">📢</div>
+          <div>
+            <div class="task-title">Join Telegram Channel</div>
+            <div class="task-sub">One-time social task</div>
+          </div>
+        </div>
+        <div class="reward green">+15</div>
+      </div>
+
+      <div class="task-actions">
+        <div class="muted">Join the official channel, then verify your membership.</div>
+        <button
+  class="btn secondary"
+  onclick="window.open('https://t.me/earnflowtaps','_blank')">
+
+  Join Channel
+
+</button>
+
+<button
+  class="btn"
+  id="verifyChannelBtn"
+  onclick="verifyChannelTask()">
+
+  Verify Membership
+
+</button>
+      </div>
+    </div>
+
+    <div class="task-row" id="checkinTaskBox">
+      <div class="task-main" onclick="toggleTask('checkinTaskBox')">
+        <div class="task-left">
+          <div class="icon">📅</div>
+          <div>
+            <div class="task-title">Daily Check-in</div>
+            <div class="task-sub" id="checkinSub">Reward loading...</div>
+          </div>
+        </div>
+        <div class="reward gold" id="checkinRewardBadge">+2</div>
+      </div>
+
+      <div class="task-actions">
+        <div class="muted" id="checkinInfo">Claim once per day after 03:00 WIB.</div>
+
+        <div class="checkin-box">
+          <div class="checkin-day" id="day1"><span>Day 1</span><b>+2</b></div>
+          <div class="checkin-day" id="day2"><span>Day 2</span><b>+6</b></div>
+          <div class="checkin-day" id="day3"><span>Day 3</span><b>+8</b></div>
+          <div class="checkin-day" id="day4"><span>Day 4</span><b>+10</b></div>
+          <div class="checkin-day" id="day5"><span>Day 5</span><b>+14</b></div>
+          <div class="checkin-day" id="day6"><span>Day 6</span><b>+18</b></div>
+          <div class="checkin-day" id="day7"><span>Day 7</span><b>+25</b></div>
+        </div>
+
+        <button class="btn secondary" id="checkinBtn" onclick="claimCheckin()">Claim Check-in</button>
+      </div>
+    </div>
+
+    <div class="task-row" id="extraTaskBox">
+      <div class="task-main" onclick="toggleTask('extraTaskBox')">
+        <div class="task-left">
+          <div class="icon">🎬</div>
+          <div>
+            <div class="task-title">Extra Ads Task</div>
+            <div class="task-sub">10 extra ads per day</div>
+          </div>
+        </div>
+        <div class="reward gold">+2</div>
+      </div>
+
+      <div class="task-actions">
+        <div class="muted">Watch extra ads and earn more points. Limit: 10/day.</div>
+        <button class="btn secondary" onclick="alert('Coming soon: Extra Ads Task')">Start Extra Ad</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="page" id="leaderboard">
+  <div class="card">
+    <h3>Leaderboard 🏆</h3>
+    <div class="muted">Top global EarnFlow users</div>
+    <div id="leaderboardList" style="margin-top:15px;">Loading leaderboard...</div>
+  </div>
+</div>
+
+<div class="page" id="withdraw">
+  <div class="card">
+    <h3>Withdraw Points</h3>
+    <select>
+      <option>DANA Indonesia 🇮🇩</option>
+      <option>USDT TRC20 🌍</option>
+    </select>
+    <input placeholder="Account / Wallet">
+    <input placeholder="Amount Points">
+    <div class="muted" style="margin-top:10px;">Minimum withdraw: 10,000 Points</div>
+    <button class="btn" onclick="alert('Withdraw is not active yet.')">Request Withdraw</button>
+  </div>
+</div>
+
+<div class="page" id="profile">
+  <div class="card">
+    <h3>Profile</h3>
+    <div class="muted">Telegram User ID</div>
+    <h2 id="profileId">-</h2>
+  </div>
+
+  <div class="row">
+    <div class="card mini">
+      <div class="icon" style="margin:auto">💎</div>
+      <b id="profileCoin">0</b>
+      <div class="muted">Points</div>
+    </div>
+
+    <div class="card mini">
+      <div class="icon" style="margin:auto">👥</div>
+      <b id="profileRefCount">0</b>
+      <div class="muted">Total Referrals</div>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="card mini">
+      <div class="icon" style="margin:auto">📅</div>
+      <b id="todayRefCount">0</b>
+      <div class="muted">Today Referrals</div>
+    </div>
+
+    <div class="card mini">
+      <div class="icon" style="margin:auto">🔥</div>
+      <b id="dailyTaskLeft">30</b>
+      <div class="muted">Tasks Left</div>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="card mini">
+      <div class="icon" style="margin:auto">📆</div>
+      <b id="profileStreak">0</b>
+      <div class="muted">Check-in Streak</div>
+    </div>
+
+    <div class="card mini">
+      <div class="icon" style="margin:auto">🎁</div>
+      <b id="profileNextReward">2</b>
+      <div class="muted">Next Reward</div>
+    </div>
+  </div>
+</div>
+
+<div class="nav">
+  <button class="active" onclick="openPage('home', this)"><span>🏠</span>Home</button>
+  <button onclick="openPage('earn', this)"><span>🎯</span>Earn</button>
+  <button onclick="openPage('leaderboard', this)"><span>🏆</span>Rank</button>
+  <button onclick="openPage('withdraw', this)"><span>💳</span>WD</button>
+  <button onclick="openPage('profile', this)"><span>👤</span>Profile</button>
+</div>
+
+<script>
+let user_id = null;
+let coins = 0;
+let completed = 0;
+let remaining = 30;
+let refCount = 0;
+let todayRefCount = 0;
+
+let dailyStreak = 0;
+let nextCheckinDay = 1;
+let nextCheckinReward = 2;
+let canCheckin = true;
+
+let adRunning = false;
+let adReadyToClaim = false;
+let timerInterval = null;
+let currentTaskToken = null;
+
+const API_URL = "https://server-production-30a5.up.railway.app";
+const BOT_USERNAME = "Tapsmoneyy_bot";
+const AD_SECONDS = 10;
+
+function toggleTask(id){
+  const box = document.getElementById(id);
+  box.classList.toggle("open");
+}
+
+function updateUI(){
+  document.getElementById("coin").innerText = coins;
+  document.getElementById("profileCoin").innerText = coins;
+  document.getElementById("completedText").innerText = completed;
+  document.getElementById("earnCompleted").innerText = completed;
+  document.getElementById("refCount").innerText = refCount;
+  document.getElementById("profileRefCount").innerText = refCount;
+  document.getElementById("todayRefCount").innerText = todayRefCount;
+  document.getElementById("dailyTaskLeft").innerText = remaining;
+
+  document.getElementById("profileStreak").innerText = dailyStreak;
+  document.getElementById("profileNextReward").innerText = nextCheckinReward;
+  document.getElementById("checkinRewardBadge").innerText = "+" + nextCheckinReward;
+  document.getElementById("checkinSub").innerText =
+    canCheckin ? "Day " + nextCheckinDay + " reward: +" + nextCheckinReward : "Already claimed today";
+
+  document.getElementById("checkinInfo").innerText =
+    canCheckin
+    ? "Ready to claim Day " + nextCheckinDay + " reward after 03:00 WIB."
+    : "You already claimed today's check-in. Come back after 03:00 WIB.";
+
+  document.getElementById("checkinBtn").disabled = !canCheckin;
+  document.getElementById("checkinBtn").innerText = canCheckin ? "Claim Check-in" : "Claimed Today";
+
+  for(let i=1;i<=7;i++){
+    const el = document.getElementById("day" + i);
+    el.classList.remove("active");
+    el.classList.remove("claimed");
+
+    if(i <= dailyStreak){
+      el.classList.add("claimed");
+    }
+
+    if(i === nextCheckinDay && canCheckin){
+      el.classList.add("active");
+    }
+  }
+}
+
+function applyServerData(data){
+  coins = Number(data.coins || coins || 0);
+  completed = Number(data.tasks_done || 0);
+  remaining = Number(data.remaining_tasks || 30);
+  refCount = Number(data.total_ref_count || data.ref_count || 0);
+  todayRefCount = Number(data.today_ref_count || 0);
+
+  dailyStreak = Number(data.daily_streak || 0);
+  nextCheckinDay = Number(data.next_checkin_day || 1);
+  nextCheckinReward = Number(data.next_checkin_reward || 2);
+  canCheckin = data.can_checkin !== false;
+
+  updateUI();
+}
+
+function getRefFromUrl(){
+  const params = new URLSearchParams(window.location.search);
+  return params.get("ref");
+}
+
+async function registerUser(ref){
+  if(!user_id) return;
+
+  try{
+    const tg = window.Telegram.WebApp;
+    const username = tg.initDataUnsafe.user.username || "";
+
+    const res = await fetch(API_URL + "/start_user",{
+      method:"POST",
+      headers:{ "Content-Type":"application/json" },
+      body:JSON.stringify({
+        user_id:user_id,
+        username:username,
+        ref:ref
+      })
+    });
+
+    const data = await res.json();
+    applyServerData(data);
+
+  }catch(err){
+    console.log(err);
+  }
+}
+
+function detectUser(){
+  if(!window.Telegram || !window.Telegram.WebApp){
+    document.getElementById("userInfo").innerText = "Open from Telegram";
+    return;
+  }
+
+  const tg = window.Telegram.WebApp;
+  tg.ready();
+  tg.expand();
+
+  if(tg.initDataUnsafe && tg.initDataUnsafe.user){
+    user_id = String(tg.initDataUnsafe.user.id);
+    const username = tg.initDataUnsafe.user.username || "";
+    const ref = getRefFromUrl();
+
+    document.getElementById("userInfo").innerText =
+      username ? "@" + username : "User ID: " + user_id;
+
+    document.getElementById("profileId").innerText = user_id;
+
+    document.getElementById("refLink").value =
+      "https://t.me/" + BOT_USERNAME + "?start=ref_" + user_id;
+
+    registerUser(ref);
+
+    setTimeout(syncPoints,500);
+    setTimeout(syncPoints,1500);
+    setTimeout(loadLeaderboard,2000);
+  }else{
+    document.getElementById("userInfo").innerText = "User not detected";
+  }
+}
+
+async function syncPoints(){
+  if(!user_id) return;
+
+  try{
+    const res = await fetch(API_URL + "/add_coin",{
+      method:"POST",
+      headers:{ "Content-Type":"application/json" },
+      body:JSON.stringify({
+        user_id:user_id,
+        amount:0
+      })
+    });
+
+    const data = await res.json();
+    applyServerData(data);
+
+  }catch(err){
+    console.log(err);
+  }
+}
+
+async function claimCheckin(){
+  if(!user_id){
+    alert("Open from Telegram first.");
+    return;
+  }
+
+  try{
+    document.getElementById("checkinBtn").disabled = true;
+
+    const res = await fetch(API_URL + "/claim_checkin",{
+      method:"POST",
+      headers:{ "Content-Type":"application/json" },
+      body:JSON.stringify({
+        user_id:user_id
+      })
+    });
+
+    const data = await res.json();
+
+    if(data.status === "success"){
+      alert("Check-in claimed! +" + data.reward + " points");
+      applyServerData(data);
+      loadLeaderboard();
+      return;
+    }
+
+    if(data.reason === "already_claimed"){
+      alert("You already claimed today's check-in.");
+      applyServerData(data);
+      return;
+    }
+
+    alert("Check-in failed. Please try again.");
+    await syncPoints();
+
+  }catch(err){
+    alert("Network error. Please try again.");
+    await syncPoints();
+  }
+}
+async function verifyChannelTask(){
+  if(!user_id){
+    alert("Open from Telegram first.");
+    return;
+  }
+
+  try{
+    const btn = document.getElementById("verifyChannelBtn");
+
+    btn.disabled = true;
+    btn.innerText = "Verifying...";
+
+    const res = await fetch(API_URL + "/verify_channel",{
+      method:"POST",
+      headers:{ "Content-Type":"application/json" },
+      body:JSON.stringify({
+        user_id:user_id
+      })
+    });
+
+    const data = await res.json();
+
+    if(data.status === "success"){
+      alert("Channel verified! +" + data.reward + " points");
+      applyServerData(data);
+      loadLeaderboard();
+      return;
+    }
+
+    if(data.reason === "already_claimed"){
+      alert("Reward already claimed.");
+      applyServerData(data);
+      return;
+    }
+
+    if(data.reason === "not_joined"){
+      alert("Please join the Telegram channel first.");
+      btn.disabled = false;
+      btn.innerText = "Verify Membership";
+      return;
+    }
+
+    alert("Verification failed.");
+    btn.disabled = false;
+    btn.innerText = "Verify Membership";
+
+  }catch(err){
+    alert("Network error.");
+    const btn = document.getElementById("verifyChannelBtn");
+    btn.disabled = false;
+    btn.innerText = "Verify Membership";
+  }
+}
+async function loadLeaderboard(){
+  try{
+    const res = await fetch(API_URL + "/leaderboard");
+    const data = await res.json();
+    const container = document.getElementById("leaderboardList");
+
+    if(!data.leaderboard || data.leaderboard.length === 0){
+      container.innerHTML = "<div class='muted'>No leaderboard data yet.</div>";
+      return;
+    }
+
+    let html = "";
+
+    data.leaderboard.forEach((user,index)=>{
+      let medal = "🏅";
+      if(index === 0) medal = "🥇";
+      if(index === 1) medal = "🥈";
+      if(index === 2) medal = "🥉";
+
+      html += `
+        <div class="rank">
+          <div>${medal} @${user.username || "user"}</div>
+          <b>${user.coins} pts</b>
+        </div>
+      `;
+    });
+
+    container.innerHTML = html;
+  }catch(err){
+    document.getElementById("leaderboardList").innerHTML =
+      "<div class='muted'>Failed to load leaderboard.</div>";
+  }
+}
+
+async function startAdFlow(){
+  if(!user_id){
+    alert("Open from Telegram first.");
+    return;
+  }
+
+  if(remaining <= 0){
+    alert("Daily limit reached.");
+    return;
+  }
+
+  if(adRunning) return;
+
+  try{
+    document.getElementById("startAdBtn").disabled = true;
+    document.getElementById("claimBtn").disabled = true;
+    document.getElementById("adStatus").innerText = "Preparing task...";
+
+    const res = await fetch(API_URL + "/start_task",{
+      method:"POST",
+      headers:{ "Content-Type":"application/json" },
+      body:JSON.stringify({ user_id:user_id })
+    });
+
+    const data = await res.json();
+
+    if(data.status === "blocked"){
+      if(data.reason === "cooldown"){
+        alert("Wait " + data.wait + " seconds.");
+      }else{
+        alert("Daily limit reached.");
+      }
+
+      resetAdUI();
+      return;
+    }
+
+    if(data.status !== "success" || !data.task_token){
+      alert("Failed to start task. Please try again.");
+      resetAdUI();
+      return;
+    }
+
+    currentTaskToken = data.task_token;
+    adRunning = true;
+    adReadyToClaim = false;
+
+    let timeLeft = AD_SECONDS;
+
+    document.getElementById("adStatus").innerText = "Watching ad...";
+    document.getElementById("timerText").innerText = timeLeft;
+
+    timerInterval = setInterval(function(){
+      timeLeft--;
+      document.getElementById("timerText").innerText = timeLeft;
+
+      if(timeLeft <= 0){
+        clearInterval(timerInterval);
+        adRunning = false;
+        adReadyToClaim = true;
+        document.getElementById("adStatus").innerText = "Ad completed. Claim reward now.";
+        document.getElementById("claimBtn").disabled = false;
+      }
+    },1000);
+
+  }catch(err){
+    alert("Network error. Please try again.");
+    resetAdUI();
+  }
+}
+
+async function claimReward(){
+  if(!adReadyToClaim || !currentTaskToken){
+    alert("Complete the ad first.");
+    return;
+  }
+
+  try{
+    document.getElementById("claimBtn").disabled = true;
+
+    const res = await fetch(API_URL + "/add_coin",{
+      method:"POST",
+      headers:{ "Content-Type":"application/json" },
+      body:JSON.stringify({
+        user_id:user_id,
+        amount:1,
+        task_token:currentTaskToken
+      })
+    });
+
+    const data = await res.json();
+
+    if(data.status === "blocked"){
+      if(data.reason === "cooldown"){
+        alert("Wait " + data.wait + " seconds.");
+      }else if(data.reason === "missing_task_token" || data.reason === "invalid_task_token"){
+        alert("Invalid task claim.");
+      }else if(data.reason === "expired_task_token"){
+        alert("Task expired. Please start again.");
+      }else{
+        alert("Daily limit reached.");
+      }
+
+      resetAdUI();
+      return;
+    }
+
+    applyServerData(data);
+    loadLeaderboard();
+    resetAdUI();
+
+  }catch(err){
+    alert("Network error. Please try again.");
+    resetAdUI();
+  }
+}
+
+function resetAdUI(){
+  adRunning = false;
+  adReadyToClaim = false;
+  currentTaskToken = null;
+
+  if(timerInterval){
+    clearInterval(timerInterval);
+    timerInterval = null;
+  }
+
+  document.getElementById("timerText").innerText = AD_SECONDS;
+  document.getElementById("adStatus").innerText = "Ready to start ad task";
+  document.getElementById("claimBtn").disabled = true;
+  document.getElementById("startAdBtn").disabled = false;
+}
+
+function openPage(id,btn){
+  document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
+  document.getElementById(id).classList.add("active");
+
+  document.querySelectorAll(".nav button").forEach(b=>b.classList.remove("active"));
+  if(btn) btn.classList.add("active");
+
+  if(id === "leaderboard"){
+    loadLeaderboard();
+  }
+
+  if(id === "profile" || id === "earn"){
+    syncPoints();
+  }
+}
+
+function copyReferral(){
+  const input = document.getElementById("refLink");
+  input.select();
+  document.execCommand("copy");
+  alert("Referral link copied!");
+}
+
+window.addEventListener("load",function(){
+  setTimeout(detectUser,500);
+});
+</script>
+
+</body>
+</html>
