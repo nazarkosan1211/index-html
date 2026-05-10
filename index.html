@@ -357,7 +357,7 @@
 
   <div class="task-actions">
     <div class="muted">
-      Watch AdsGram premium video ads and earn +6 points. Daily limit: 15.
+      Watch 2 AdsGram premium ads and earn +6 points. Daily limit: 15.
     </div>
 
     <div class="ad-box" style="margin-top:8px;background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.10)">
@@ -424,7 +424,7 @@
       </div>
 
       <div class="task-actions">
-        <div class="muted">Watch Extra Task 1 ad and earn +4 points. Daily limit: 30.</div>
+        <div class="muted">Watch 2 ads for Extra Task 1 and earn +4 points. Daily limit: 30.</div>
         <div class="ad-box" style="margin-top:8px;background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.10)">
           <div class="muted" id="extra1Status">Extra Task 1 ready</div>
           <div class="timer" id="extra1TimerText" style="color:#93c5fd">+4</div>
@@ -448,7 +448,7 @@
       </div>
 
       <div class="task-actions">
-        <div class="muted">Watch Extra Task 2 ad and earn +3 points. Daily limit: 30.</div>
+        <div class="muted">Watch 2 ads for Extra Task 2 and earn +3 points. Daily limit: 30.</div>
         <div class="ad-box" style="margin-top:8px;background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.10)">
           <div class="muted" id="extra2Status">Extra Task 2 ready</div>
           <div class="timer" id="extra2TimerText" style="color:#93c5fd">+3</div>
@@ -630,12 +630,12 @@ const SMART_AD_COOLDOWN = 60000;
 const API_URL = "https://server-production-30a5.up.railway.app";
 const BOT_USERNAME = "Tapsmoneyy_bot";
 const AD_SECONDS = 10;
-const ADSGRAM_BLOCK_ID = "29797";
+const SUPER_REWARD_BLOCKS = ["29797", "int-29903"];
 const SUPER_DAILY_LIMIT = 15;
 const EXTRA_TASK_LIMIT = 30;
 const EXTRA_TASK_BLOCKS = {
-  extra1: "int-29899",
-  extra2: "int-29900"
+  extra1: ["int-29899", "int-29901"],
+  extra2: ["int-29900", "int-29902"]
 };
 
 
@@ -1163,6 +1163,62 @@ async function claimReward(){
 
 
 
+
+function isAdsgramRewardedDone(result){
+  if(result && result.error === true){
+    return false;
+  }
+
+  if(result && result.done === false){
+    return false;
+  }
+
+  return true;
+}
+
+async function showAdsgramBlock(blockId){
+  if(!window.Adsgram || typeof window.Adsgram.init !== "function"){
+    throw {
+      error:true,
+      done:false,
+      state:"load",
+      description:"AdsGram script not loaded"
+    };
+  }
+
+  const AdController = window.Adsgram.init({
+    blockId:blockId
+  });
+
+  const result = await AdController.show();
+
+  if(!isAdsgramRewardedDone(result)){
+    throw result || {
+      error:true,
+      done:false,
+      state:"destroy",
+      description:"Ad not completed"
+    };
+  }
+
+  return result;
+}
+
+async function showAdsgramSequence(blockIds, statusEl, timerEl, taskName){
+  for(let i = 0; i < blockIds.length; i++){
+    if(statusEl){
+      statusEl.innerText = taskName + " ad " + (i + 1) + "/" + blockIds.length + ": watch until completed.";
+    }
+
+    if(timerEl){
+      timerEl.innerText = (i + 1) + "/" + blockIds.length;
+    }
+
+    await showAdsgramBlock(blockIds[i]);
+  }
+}
+
+
 function resetSuperRewardUI(){
   superRunning = false;
   currentSuperTaskToken = null;
@@ -1260,55 +1316,28 @@ async function startSuperRewardFlow(){
     currentSuperTaskToken = startData.super_task_token;
     applyServerData(startData);
 
-    if(!window.Adsgram || typeof window.Adsgram.init !== "function"){
-      alert("AdsGram script not loaded. Please try again.");
+    try{
+      await showAdsgramSequence(SUPER_REWARD_BLOCKS, status, timer, "Super Reward");
+
+      if(status){
+        status.innerText = "Both ads completed. Crediting reward...";
+      }
+
+      if(timer){
+        timer.innerText = "✓";
+      }
+
+      await claimSuperReward();
+
+    }catch(result){
+      console.log("Super Reward AdsGram failed:", result);
+      if(result && result.description === "AdsGram script not loaded"){
+        alert("AdsGram script not loaded. Please try again.");
+      }else{
+        alert("Ad failed, was closed, or was not completed. Reward not credited.");
+      }
       resetSuperRewardUI();
-      return;
     }
-
-    if(status){
-      status.innerText = "Watch AdsGram video until completed.";
-    }
-
-    if(timer){
-      timer.innerText = "▶";
-    }
-
-    const AdController = window.Adsgram.init({
-      blockId: ADSGRAM_BLOCK_ID
-    });
-
-    AdController.show()
-      .then(async (result) => {
-        console.log("AdsGram success:", result);
-
-        if(result && result.error === true){
-          alert("AdsGram error. Reward not credited.");
-          resetSuperRewardUI();
-          return;
-        }
-
-        if(result && result.done === false){
-          alert("Ad was not completed. Reward not credited.");
-          resetSuperRewardUI();
-          return;
-        }
-
-        if(status){
-          status.innerText = "Ad completed. Crediting reward...";
-        }
-
-        if(timer){
-          timer.innerText = "✓";
-        }
-
-        await claimSuperReward();
-      })
-      .catch((result) => {
-        console.log("AdsGram failed:", result);
-        alert("Ad failed or was closed. Reward not credited.");
-        resetSuperRewardUI();
-      });
 
   }catch(err){
     console.log(err);
@@ -1395,7 +1424,7 @@ function extraTaskMeta(taskKey){
     return {
       title: "Extra Task 1",
       reward: 4,
-      blockId: EXTRA_TASK_BLOCKS.extra1,
+      blockIds: EXTRA_TASK_BLOCKS.extra1,
       btnId: "extra1Btn",
       statusId: "extra1Status",
       timerId: "extra1TimerText"
@@ -1405,7 +1434,7 @@ function extraTaskMeta(taskKey){
   return {
     title: "Extra Task 2",
     reward: 3,
-    blockId: EXTRA_TASK_BLOCKS.extra2,
+    blockIds: EXTRA_TASK_BLOCKS.extra2,
     btnId: "extra2Btn",
     statusId: "extra2Status",
     timerId: "extra2TimerText"
@@ -1520,55 +1549,28 @@ async function startExtraTaskFlow(taskKey){
     currentExtraTaskToken = startData.extra_task_token;
     applyServerData(startData);
 
-    if(!window.Adsgram || typeof window.Adsgram.init !== "function"){
-      alert("AdsGram script not loaded. Please try again.");
+    try{
+      await showAdsgramSequence(meta.blockIds, status, timer, meta.title);
+
+      if(status){
+        status.innerText = "Both ads completed. Crediting reward...";
+      }
+
+      if(timer){
+        timer.innerText = "✓";
+      }
+
+      await claimExtraTask(taskKey);
+
+    }catch(result){
+      console.log(meta.title + " AdsGram failed:", result);
+      if(result && result.description === "AdsGram script not loaded"){
+        alert("AdsGram script not loaded. Please try again.");
+      }else{
+        alert("Ad failed, was closed, or was not completed. Reward not credited.");
+      }
       resetExtraTaskUI(taskKey);
-      return;
     }
-
-    if(status){
-      status.innerText = "Watch " + meta.title + " ad until completed.";
-    }
-
-    if(timer){
-      timer.innerText = "▶";
-    }
-
-    const AdController = window.Adsgram.init({
-      blockId: meta.blockId
-    });
-
-    AdController.show()
-      .then(async (result) => {
-        console.log(meta.title + " AdsGram success:", result);
-
-        if(result && result.error === true){
-          alert("AdsGram error. Reward not credited.");
-          resetExtraTaskUI(taskKey);
-          return;
-        }
-
-        if(result && result.done === false){
-          alert("Ad was not completed. Reward not credited.");
-          resetExtraTaskUI(taskKey);
-          return;
-        }
-
-        if(status){
-          status.innerText = "Ad completed. Crediting reward...";
-        }
-
-        if(timer){
-          timer.innerText = "✓";
-        }
-
-        await claimExtraTask(taskKey);
-      })
-      .catch((result) => {
-        console.log(meta.title + " AdsGram failed:", result);
-        alert("Ad failed or was closed. Reward not credited.");
-        resetExtraTaskUI(taskKey);
-      });
 
   }catch(err){
     console.log(err);
