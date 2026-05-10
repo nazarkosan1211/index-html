@@ -352,17 +352,17 @@
         <div class="super-glow">ADSGRAM VIDEO</div>
       </div>
     </div>
-    <div class="reward">+5</div>
+    <div class="reward">+6</div>
   </div>
 
   <div class="task-actions">
     <div class="muted">
-      Watch AdsGram premium video ads and earn +5 points. Daily limit: 15.
+      Watch AdsGram premium video ads and earn +6 points. Daily limit: 15.
     </div>
 
     <div class="ad-box" style="margin-top:8px;background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.10)">
       <div class="muted" id="superAdStatus">Super Reward ready</div>
-      <div class="timer" id="superTimerText" style="color:#fde68a">+5</div>
+      <div class="timer" id="superTimerText" style="color:#fde68a">+6</div>
     </div>
 
     <button
@@ -409,23 +409,51 @@
       </div>
     </div>
 
-
-    <div class="task-row extra-coming-task" id="extraTaskBox">
-      <div class="task-main" onclick="toggleTask('extraTaskBox')">
+    <div class="task-row extra-coming-task" id="extraTask1Box">
+      <div class="task-main" onclick="toggleTask('extraTask1Box')">
         <div class="task-left">
           <div class="icon">🚀</div>
           <div>
-            <div class="task-title">Extra Task</div>
-            <div class="task-sub">More reward missions coming soon</div>
-            <div class="coming-badge">COMING SOON</div>
+            <div class="task-title">Extra Task 1</div>
+            <div class="task-sub"><span id="extra1Completed">0</span>/30 completed</div>
+            <div class="progress-wrap"><div class="progress-bar" id="extra1ProgressBar"></div></div>
+            <div class="coming-badge">ADSGRAM</div>
           </div>
         </div>
-        <div class="reward">+?</div>
+        <div class="reward">+4</div>
       </div>
 
       <div class="task-actions">
-        <div class="muted">Extra earning missions will be available soon.</div>
-        <button class="btn secondary" onclick="alert('Coming soon')">Coming Soon</button>
+        <div class="muted">Watch Extra Task 1 ad and earn +4 points. Daily limit: 30.</div>
+        <div class="ad-box" style="margin-top:8px;background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.10)">
+          <div class="muted" id="extra1Status">Extra Task 1 ready</div>
+          <div class="timer" id="extra1TimerText" style="color:#93c5fd">+4</div>
+        </div>
+        <button class="btn" id="extra1Btn" onclick="startExtraTaskFlow('extra1')">▶ Start Extra Task 1</button>
+      </div>
+    </div>
+
+    <div class="task-row extra-coming-task" id="extraTask2Box">
+      <div class="task-main" onclick="toggleTask('extraTask2Box')">
+        <div class="task-left">
+          <div class="icon">🎁</div>
+          <div>
+            <div class="task-title">Extra Task 2</div>
+            <div class="task-sub"><span id="extra2Completed">0</span>/30 completed</div>
+            <div class="progress-wrap"><div class="progress-bar" id="extra2ProgressBar"></div></div>
+            <div class="coming-badge">ADSGRAM</div>
+          </div>
+        </div>
+        <div class="reward">+3</div>
+      </div>
+
+      <div class="task-actions">
+        <div class="muted">Watch Extra Task 2 ad and earn +3 points. Daily limit: 30.</div>
+        <div class="ad-box" style="margin-top:8px;background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.10)">
+          <div class="muted" id="extra2Status">Extra Task 2 ready</div>
+          <div class="timer" id="extra2TimerText" style="color:#93c5fd">+3</div>
+        </div>
+        <button class="btn" id="extra2Btn" onclick="startExtraTaskFlow('extra2')">▶ Start Extra Task 2</button>
       </div>
     </div>
 
@@ -588,6 +616,14 @@ let superRemaining = 15;
 let superRunning = false;
 let currentSuperTaskToken = null;
 
+let extra1Completed = 0;
+let extra1Remaining = 30;
+let extra2Completed = 0;
+let extra2Remaining = 30;
+let extraTaskRunning = false;
+let currentExtraTaskToken = null;
+let currentExtraTaskKey = null;
+
 let lastSmartAdTime = 0;
 const SMART_AD_COOLDOWN = 60000;
 
@@ -596,6 +632,11 @@ const BOT_USERNAME = "Tapsmoneyy_bot";
 const AD_SECONDS = 10;
 const ADSGRAM_BLOCK_ID = "29797";
 const SUPER_DAILY_LIMIT = 15;
+const EXTRA_TASK_LIMIT = 30;
+const EXTRA_TASK_BLOCKS = {
+  extra1: "int-29899",
+  extra2: "int-29900"
+};
 
 
 function smartAdPing(reason){
@@ -659,6 +700,44 @@ function updateUI(){
     }
   }
 
+  const extra1CompletedEl = document.getElementById("extra1Completed");
+  const extra2CompletedEl = document.getElementById("extra2Completed");
+  const extra1ProgressBarEl = document.getElementById("extra1ProgressBar");
+  const extra2ProgressBarEl = document.getElementById("extra2ProgressBar");
+  const extra1BtnEl = document.getElementById("extra1Btn");
+  const extra2BtnEl = document.getElementById("extra2Btn");
+
+  if(extra1CompletedEl){ extra1CompletedEl.innerText = extra1Completed; }
+  if(extra2CompletedEl){ extra2CompletedEl.innerText = extra2Completed; }
+
+  if(extra1ProgressBarEl){
+    extra1ProgressBarEl.style.width = Math.min(100, Math.max(0, (extra1Completed / EXTRA_TASK_LIMIT) * 100)) + "%";
+  }
+
+  if(extra2ProgressBarEl){
+    extra2ProgressBarEl.style.width = Math.min(100, Math.max(0, (extra2Completed / EXTRA_TASK_LIMIT) * 100)) + "%";
+  }
+
+  if(extra1BtnEl && !extraTaskRunning){
+    if(extra1Completed >= EXTRA_TASK_LIMIT || extra1Remaining <= 0){
+      extra1BtnEl.disabled = true;
+      extra1BtnEl.innerText = "Daily Limit Reached";
+    }else{
+      extra1BtnEl.disabled = false;
+      extra1BtnEl.innerText = "▶ Start Extra Task 1";
+    }
+  }
+
+  if(extra2BtnEl && !extraTaskRunning){
+    if(extra2Completed >= EXTRA_TASK_LIMIT || extra2Remaining <= 0){
+      extra2BtnEl.disabled = true;
+      extra2BtnEl.innerText = "Daily Limit Reached";
+    }else{
+      extra2BtnEl.disabled = false;
+      extra2BtnEl.innerText = "▶ Start Extra Task 2";
+    }
+  }
+
   document.getElementById("profileStreak").innerText = dailyStreak;
   document.getElementById("profileNextReward").innerText = nextCheckinReward;
   document.getElementById("checkinRewardBadge").innerText = "+" + nextCheckinReward;
@@ -696,6 +775,10 @@ function applyServerData(data){
   todayRefCount = Number(data.today_ref_count || 0);
   superCompleted = Number(data.super_tasks_done || superCompleted || 0);
   superRemaining = Number(data.super_remaining_tasks || (SUPER_DAILY_LIMIT - superCompleted));
+  extra1Completed = Number(data.extra1_tasks_done || extra1Completed || 0);
+  extra1Remaining = Number(data.extra1_remaining_tasks || (EXTRA_TASK_LIMIT - extra1Completed));
+  extra2Completed = Number(data.extra2_tasks_done || extra2Completed || 0);
+  extra2Remaining = Number(data.extra2_remaining_tasks || (EXTRA_TASK_LIMIT - extra2Completed));
 
   dailyStreak = Number(data.daily_streak || 0);
   nextCheckinDay = Number(data.next_checkin_day || 1);
@@ -1103,7 +1186,7 @@ function resetSuperRewardUI(){
   }
 
   if(timer){
-    timer.innerText = "+5";
+    timer.innerText = "+6";
   }
 }
 
@@ -1254,7 +1337,7 @@ async function claimSuperReward(){
     const claimData = await claimRes.json();
 
     if(claimData.status === "success"){
-      alert("Super Reward claimed! +" + (claimData.reward || 5) + " points");
+      alert("Super Reward claimed! +" + (claimData.reward || 6) + " points");
 
       applyServerData(claimData);
 
@@ -1270,7 +1353,7 @@ async function claimSuperReward(){
       }
 
       if(timer){
-        timer.innerText = "+5";
+        timer.innerText = "+6";
       }
 
       setTimeout(resetSuperRewardUI, 900);
@@ -1302,6 +1385,271 @@ async function claimSuperReward(){
     console.log(err);
     alert("Network error. Please try again.");
     resetSuperRewardUI();
+  }
+}
+
+
+
+function extraTaskMeta(taskKey){
+  if(taskKey === "extra1"){
+    return {
+      title: "Extra Task 1",
+      reward: 4,
+      blockId: EXTRA_TASK_BLOCKS.extra1,
+      btnId: "extra1Btn",
+      statusId: "extra1Status",
+      timerId: "extra1TimerText"
+    };
+  }
+
+  return {
+    title: "Extra Task 2",
+    reward: 3,
+    blockId: EXTRA_TASK_BLOCKS.extra2,
+    btnId: "extra2Btn",
+    statusId: "extra2Status",
+    timerId: "extra2TimerText"
+  };
+}
+
+function resetExtraTaskUI(taskKey){
+  const meta = extraTaskMeta(taskKey || currentExtraTaskKey || "extra1");
+  extraTaskRunning = false;
+  currentExtraTaskToken = null;
+  currentExtraTaskKey = null;
+
+  const btn = document.getElementById(meta.btnId);
+  const status = document.getElementById(meta.statusId);
+  const timer = document.getElementById(meta.timerId);
+
+  const done = taskKey === "extra2" ? extra2Completed : extra1Completed;
+  const remainingTask = taskKey === "extra2" ? extra2Remaining : extra1Remaining;
+
+  if(btn){
+    if(done >= EXTRA_TASK_LIMIT || remainingTask <= 0){
+      btn.disabled = true;
+      btn.innerText = "Daily Limit Reached";
+    }else{
+      btn.disabled = false;
+      btn.innerText = "▶ Start " + meta.title;
+    }
+  }
+
+  if(status){
+    status.innerText = meta.title + " ready";
+  }
+
+  if(timer){
+    timer.innerText = "+" + meta.reward;
+  }
+}
+
+async function startExtraTaskFlow(taskKey){
+  if(!user_id){
+    alert("Open from Telegram first.");
+    return;
+  }
+
+  const meta = extraTaskMeta(taskKey);
+  const done = taskKey === "extra2" ? extra2Completed : extra1Completed;
+  const remainingTask = taskKey === "extra2" ? extra2Remaining : extra1Remaining;
+
+  if(extraTaskRunning){
+    return;
+  }
+
+  if(done >= EXTRA_TASK_LIMIT || remainingTask <= 0){
+    alert(meta.title + " daily limit reached.");
+    return;
+  }
+
+  const btn = document.getElementById(meta.btnId);
+  const status = document.getElementById(meta.statusId);
+  const timer = document.getElementById(meta.timerId);
+
+  try{
+    extraTaskRunning = true;
+    currentExtraTaskKey = taskKey;
+
+    if(btn){
+      btn.disabled = true;
+      btn.innerText = "Preparing...";
+    }
+
+    if(status){
+      status.innerText = "Preparing " + meta.title + "...";
+    }
+
+    if(timer){
+      timer.innerText = "AD";
+    }
+
+    const startRes = await fetch(API_URL + "/start_extra_task",{
+      method:"POST",
+      headers:{ "Content-Type":"application/json" },
+      body:JSON.stringify({
+        user_id:user_id,
+        task_key:taskKey
+      })
+    });
+
+    const startData = await startRes.json();
+
+    if(startData.status === "blocked"){
+      if(startData.reason === "cooldown"){
+        alert("Wait " + startData.wait + " seconds before the next " + meta.title + ".");
+      }else if(startData.reason === "daily_limit"){
+        alert(meta.title + " daily limit reached.");
+      }else if(startData.reason === "banned"){
+        alert("Account blocked.");
+      }else{
+        alert(startData.message || "Cannot start " + meta.title + ".");
+      }
+
+      applyServerData(startData);
+      resetExtraTaskUI(taskKey);
+      return;
+    }
+
+    if(startData.status !== "success" || !startData.extra_task_token){
+      alert(startData.message || "Failed to start " + meta.title + ".");
+      resetExtraTaskUI(taskKey);
+      return;
+    }
+
+    currentExtraTaskToken = startData.extra_task_token;
+    applyServerData(startData);
+
+    if(!window.Adsgram || typeof window.Adsgram.init !== "function"){
+      alert("AdsGram script not loaded. Please try again.");
+      resetExtraTaskUI(taskKey);
+      return;
+    }
+
+    if(status){
+      status.innerText = "Watch " + meta.title + " ad until completed.";
+    }
+
+    if(timer){
+      timer.innerText = "▶";
+    }
+
+    const AdController = window.Adsgram.init({
+      blockId: meta.blockId
+    });
+
+    AdController.show()
+      .then(async (result) => {
+        console.log(meta.title + " AdsGram success:", result);
+
+        if(result && result.error === true){
+          alert("AdsGram error. Reward not credited.");
+          resetExtraTaskUI(taskKey);
+          return;
+        }
+
+        if(result && result.done === false){
+          alert("Ad was not completed. Reward not credited.");
+          resetExtraTaskUI(taskKey);
+          return;
+        }
+
+        if(status){
+          status.innerText = "Ad completed. Crediting reward...";
+        }
+
+        if(timer){
+          timer.innerText = "✓";
+        }
+
+        await claimExtraTask(taskKey);
+      })
+      .catch((result) => {
+        console.log(meta.title + " AdsGram failed:", result);
+        alert("Ad failed or was closed. Reward not credited.");
+        resetExtraTaskUI(taskKey);
+      });
+
+  }catch(err){
+    console.log(err);
+    alert("Network error. Please try again.");
+    resetExtraTaskUI(taskKey);
+  }
+}
+
+async function claimExtraTask(taskKey){
+  const meta = extraTaskMeta(taskKey);
+
+  if(!currentExtraTaskToken){
+    alert(meta.title + " token missing. Please start again.");
+    resetExtraTaskUI(taskKey);
+    return;
+  }
+
+  try{
+    const claimRes = await fetch(API_URL + "/claim_extra_task",{
+      method:"POST",
+      headers:{ "Content-Type":"application/json" },
+      body:JSON.stringify({
+        user_id:user_id,
+        task_key:taskKey,
+        extra_task_token:currentExtraTaskToken
+      })
+    });
+
+    const claimData = await claimRes.json();
+
+    if(claimData.status === "success"){
+      alert(meta.title + " claimed! +" + (claimData.reward || meta.reward) + " points");
+
+      applyServerData(claimData);
+
+      if(typeof loadLeaderboard === "function"){
+        loadLeaderboard();
+      }
+
+      const status = document.getElementById(meta.statusId);
+      const timer = document.getElementById(meta.timerId);
+
+      if(status){
+        status.innerText = meta.title + " credited successfully!";
+      }
+
+      if(timer){
+        timer.innerText = "+" + meta.reward;
+      }
+
+      setTimeout(function(){
+        resetExtraTaskUI(taskKey);
+      }, 900);
+      return;
+    }
+
+    if(claimData.status === "blocked"){
+      if(claimData.reason === "daily_limit"){
+        alert(meta.title + " daily limit reached.");
+      }else if(claimData.reason === "missing_extra_task_token" || claimData.reason === "invalid_extra_task_token"){
+        alert("Invalid " + meta.title + " claim.");
+      }else if(claimData.reason === "expired_extra_task_token"){
+        alert(meta.title + " expired. Please start again.");
+      }else if(claimData.reason === "banned"){
+        alert("Account blocked.");
+      }else{
+        alert(claimData.message || meta.title + " claim blocked.");
+      }
+
+      applyServerData(claimData);
+      resetExtraTaskUI(taskKey);
+      return;
+    }
+
+    alert(claimData.message || meta.title + " claim failed.");
+    resetExtraTaskUI(taskKey);
+
+  }catch(err){
+    console.log(err);
+    alert("Network error. Please try again.");
+    resetExtraTaskUI(taskKey);
   }
 }
 
