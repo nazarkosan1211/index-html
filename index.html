@@ -1153,7 +1153,9 @@ async function startSuperRewardFlow(){
     const startData = await startRes.json();
 
     if(startData.status === "blocked"){
-      if(startData.reason === "daily_limit"){
+      if(startData.reason === "cooldown"){
+        alert("Wait " + startData.wait + " seconds before the next Super Reward.");
+      }else if(startData.reason === "daily_limit"){
         alert("Super Reward daily limit reached.");
       }else if(startData.reason === "banned"){
         alert("Account blocked.");
