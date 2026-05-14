@@ -509,18 +509,17 @@
     <h3>Withdraw Points</h3>
 
     <select id="withdrawMethod">
-      <option value="DANA">DANA Indonesia 🇮🇩</option>
-      <option value="USDT TRC20">USDT TRC20 🌍</option>
-      <option value="USDT BSC">USDT BSC 🌍</option>
-      <option value="TON">TON 🌍</option>
-      <option value="USDT APTOS">USDT APTOS 🌍</option>
+      <option value="USDT TRC20">🟢 USDT TRC20</option>
+      <option value="USDT BSC">🟡 USDT BSC</option>
+      <option value="TON">🔵 TON Network</option>
+      <option value="USDT APTOS">🟣 USDT APTOS</option>
     </select>
 
     <input id="withdrawAccount" placeholder="Account / Wallet">
     <input id="withdrawAmount" type="number" placeholder="Amount Points">
 
     <div class="muted" style="margin-top:10px;">
-      Minimum withdraw: 2,500 Points. Reviewed manually by admin.
+      Minimum withdraw: 1,500 Points. Reviewed manually by admin.
     </div>
 
     <button class="btn" onclick="submitWithdraw()">Request Withdraw</button>
@@ -542,7 +541,7 @@
     <div class="card premium-card">
     <h3>Estimated Value</h3>
     <h2 id="profileDollar">$0.00</h2>
-    <div class="muted">Rate: 2500 Points = $1.00</div>
+    <div class="muted">Rate: 1500 Points = $1.00</div>
   </div>
 
 <div class="row">
@@ -663,7 +662,7 @@ function toggleTask(id){
 }
 
 function formatDollar(points){
-  return "$" + (Number(points || 0) / 2500).toFixed(2);
+  return "$" + (Number(points || 0) / 1500).toFixed(2);
 }
 
 function updateUI(){
@@ -1674,8 +1673,8 @@ async function submitWithdraw(){
     return;
   }
 
-  if(amount < 2500){
-    alert("Minimum withdraw is 2,500 points.");
+  if(amount < 1500){
+    alert("Minimum withdraw is 1,500 points.");
     return;
   }
 
